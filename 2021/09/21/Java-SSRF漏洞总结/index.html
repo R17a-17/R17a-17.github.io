@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Java SSRF关键字： 123456789101112131415161718HttpClient.executeHttpClient.executeMethodHttpURLConnection.connectHttpURLConnection.getInputStreamURL.openStreamHttpServletRequestgetParameterURIURLHttpClient">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java SSRF漏洞总结">
+<meta property="og:url" content="http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="R17a&#39;s blog">
+<meta property="og:description" content="Java SSRF关键字： 123456789101112131415161718HttpClient.executeHttpClient.executeMethodHttpURLConnection.connectHttpURLConnection.getInputStreamURL.openStreamHttpServletRequestgetParameterURIURLHttpClient">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-09-21T06:53:27.000Z">
+<meta property="article:modified_time" content="2021-09-21T06:53:27.000Z">
+<meta property="article:author" content="R17a">
+<meta property="article:tag" content="SSRF">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Java SSRF漏洞总结</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/09/21/Java%20URL%E8%B7%B3%E8%BD%AC%E6%80%BB%E7%BB%93/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/09/21/Java%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C%E7%B1%BB%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&text=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&is_video=false&description=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java SSRF漏洞总结&body=Check out this article: http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&name=Java SSRF漏洞总结&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&t=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Java SSRF漏洞总结
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">R17a</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-09-21T06:53:27.000Z" itemprop="datePublished">2021-09-21</time>
+        
+        (Updated: <time datetime="2021-09-21T06:53:27.000Z" itemprop="dateModified">2021-09-21</time>)
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a> › <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/SSRF/">SSRF</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/SSRF/" rel="tag">SSRF</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>Java SSRF关键字：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">HttpClient.execute</span><br><span class="line">HttpClient.executeMethod</span><br><span class="line">HttpURLConnection.connect</span><br><span class="line">HttpURLConnection.getInputStream</span><br><span class="line">URL.openStream</span><br><span class="line">HttpServletRequest</span><br><span class="line">getParameter</span><br><span class="line">URI</span><br><span class="line">URL</span><br><span class="line">HttpClient</span><br><span class="line">HttpServletRequest</span><br><span class="line">HttpURLConnection</span><br><span class="line">URLConnection</span><br><span class="line">okhttp</span><br><span class="line">BasicHttpEntityEnclosingRequest</span><br><span class="line">DafauleBHttpClientConnection</span><br><span class="line">BasicHttpRequest</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>Java下ssrf简单的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Ssrf</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Ssrf ssrf = <span class="keyword">new</span> Ssrf();</span><br><span class="line">        <span class="comment">//        ssrf.requestByURLConnection("http://www.baidu.com");</span></span><br><span class="line">        ssrf.requestByURLConnection(<span class="string">"file:///E:/111.txt"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * URLConnection支持的协议：file ftp mailto http https jar netdoc gopher</span></span><br><span class="line"><span class="comment">     * gopher仅在java8以前支持，并且Java7高版本对gopher有限制</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">requestByURLConnection</span><span class="params">(String url)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//        url = "file:///E:/111.txt";</span></span><br><span class="line">        <span class="comment">//        url = "http://www.baidu.com"</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.urlFilterByWhiteList(url).equals(<span class="string">""</span>))&#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            String htmlContent;</span><br><span class="line">            URL u = <span class="keyword">new</span> URL(url);   <span class="comment">//实例化url的对象</span></span><br><span class="line">            URLConnection urlConnection = u.openConnection();<span class="comment">//打开一个URL连接，并运行客户端访问资源。</span></span><br><span class="line">            <span class="comment">//            HttpURLConnection urlConnection1 = (HttpURLConnection) urlConnection;  //转成HttpURLConnection</span></span><br><span class="line">            BufferedReader bufferedReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(urlConnection.getInputStream(), <span class="string">"UTF-8"</span>));<span class="comment">//获取url中的资源</span></span><br><span class="line">            StringBuffer html = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">            <span class="keyword">while</span> ((htmlContent = bufferedReader.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                html.append(htmlContent);</span><br><span class="line">            &#125;</span><br><span class="line">            bufferedReader.close();</span><br><span class="line">            System.out.println(html);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 过滤url，增加白名单校验</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String <span class="title">urlFilterByWhiteList</span><span class="params">(String url)</span> </span>&#123;</span><br><span class="line">        String[] whiteProtocolList = &#123;<span class="string">"http://"</span>, <span class="string">"https://"</span>&#125;;</span><br><span class="line">        String[] whiteUrlList = &#123;<span class="string">"http://enable.com/"</span>,<span class="string">"http://enable1.com/"</span>&#125;;</span><br><span class="line">        <span class="keyword">boolean</span> protocolFlag = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">boolean</span> urlFlag = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String list : whiteProtocolList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (url.toLowerCase().contains(list) &amp;&amp; url.toLowerCase().indexOf(list) == <span class="number">0</span>) &#123;</span><br><span class="line">                protocolFlag = <span class="keyword">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(!protocolFlag)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String list : whiteUrlList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (url.toLowerCase().contains(list) &amp;&amp; url.toLowerCase().indexOf(list) == <span class="number">0</span>) &#123;</span><br><span class="line">                urlFlag = <span class="keyword">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(!urlFlag)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> url;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 过滤url，增加黑名单校验</span></span><br><span class="line"><span class="comment">     * 黑名单校验存在绕过风险</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String <span class="title">urlFilterByBlackList</span><span class="params">(String url)</span> </span>&#123;</span><br><span class="line">        String[] blackProtocolList = &#123;<span class="string">"file"</span>, <span class="string">"ftp"</span>, <span class="string">"mailto"</span>, <span class="string">"jar"</span>, <span class="string">"netdoc"</span>, <span class="string">"gopher"</span>&#125;;</span><br><span class="line">        String[] blackUrlList = &#123;<span class="string">"192.168"</span>, <span class="string">"172."</span>, <span class="string">"169.254"</span>&#125;;</span><br><span class="line">        <span class="keyword">boolean</span> protocolFlag = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">boolean</span> urlFlag = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String list : blackProtocolList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (url.toLowerCase().contains(list) &amp;&amp; url.toLowerCase().indexOf(list) == <span class="number">0</span>) &#123;</span><br><span class="line">                protocolFlag = <span class="keyword">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(protocolFlag)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String list : blackUrlList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (url.toLowerCase().contains(list) &amp;&amp; url.toLowerCase().indexOf(list) == <span class="number">0</span>) &#123;</span><br><span class="line">                urlFlag = <span class="keyword">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(urlFlag)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> url;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ssrf修复（来自《Java代码审计》）：</p>
+<p>1、统一错误信息，避免用户根据错误信息来判断远端服务器的端口状态。<br>2、限制请求的端口为 http 的常用端口，比如80、443、8080、8090等。<br>3、禁用不需要的协议，仅仅允许 http 和 https 请求。<br>4、根据业务需求，判定所需的域名是否是常用的几个，若是，则将这几个特定的域名加入白名单,拒绝白名单域名之外的请求。<br>5、根据请求来源，判定请求地址是否是固定请求来源，若是，则将这几个特定的域名/ IP添加到白名单,拒绝白名单域名/IP之外的请求。<br>6、若业务需求和请求来源并不固定,则可以自己编写一个 ssrfCheck 函数,检测特定的域名、判断是否是内网 IP 、判断是否为 http / https 协议等。</p>
+<p>参考链接：</p>
+<p><a href="https://www.bookstack.cn/read/anbai-inc-javaweb-sec/javase-URLConnection-README.md" target="_blank" rel="noopener">https://www.bookstack.cn/read/anbai-inc-javaweb-sec/javase-URLConnection-README.md</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&text=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&is_video=false&description=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java SSRF漏洞总结&body=Check out this article: http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&title=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&name=Java SSRF漏洞总结&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/09/21/Java-SSRF%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/&t=Java SSRF漏洞总结" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2021
+    R17a
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?05441306932d71b1dba39f817847ce3e";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
