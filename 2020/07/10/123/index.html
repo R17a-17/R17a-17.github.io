@@ -9,7 +9,7 @@
     <meta name="description" content="0x00 漏洞信息12345VUL &#x3D; [&quot;CVE-2020-1957&amp;CVE-2020-11989&quot;]VUL_NAME &#x3D; [&quot;Apahce Shiro权限绕过漏洞&quot;]TYPE &#x3D; [&quot;Permissions Bypass&quot;]DESCRIPTION &#x3D; &#39;&#39;&#39;2020年3月23号，Shiro开发者Brian Demers在用户社区发表帖子，提醒shiro用户进行安全更新，本次更新进行了三">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析">
-<meta property="og:url" content="https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/index.html">
+<meta property="og:url" content="https://r17a-17.github.io/2020/07/10/123/index.html">
 <meta property="og:site_name" content="R17a&#39;s blog">
 <meta property="og:description" content="0x00 漏洞信息12345VUL &#x3D; [&quot;CVE-2020-1957&amp;CVE-2020-11989&quot;]VUL_NAME &#x3D; [&quot;Apahce Shiro权限绕过漏洞&quot;]TYPE &#x3D; [&quot;Permissions Bypass&quot;]DESCRIPTION &#x3D; &#39;&#39;&#39;2020年3月23号，Shiro开发者Brian Demers在用户社区发表帖子，提醒shiro用户进行安全更新，本次更新进行了三">
 <meta property="og:locale" content="en_US">
@@ -140,17 +140,17 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&text=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&is_video=false&description=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&body=Check out this article: https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&name=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&t=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/07/10/123/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/07/10/123/&text=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/07/10/123/&is_video=false&description=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&body=Check out this article: https://r17a-17.github.io/2020/07/10/123/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/07/10/123/&name=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/07/10/123/&t=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -348,17 +348,17 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&text=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&is_video=false&description=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&body=Check out this article: https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&name=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/07/10/CVE-2020-1957-CVE-2020-11989/&t=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/07/10/123/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/07/10/123/&text=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/07/10/123/&is_video=false&description=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&body=Check out this article: https://r17a-17.github.io/2020/07/10/123/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/07/10/123/&title=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/07/10/123/&name=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/07/10/123/&t=Apache Shiro CVE-2020-1957&amp;CVE-2020-11989身份认证绕过漏洞分析" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
