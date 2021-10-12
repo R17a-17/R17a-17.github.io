@@ -9,40 +9,40 @@
     <meta name="description" content="本文章已投稿seebug：https:&#x2F;&#x2F;paper.seebug.org&#x2F;1316&#x2F; 【有点尴尬的是排版乱的】 0x00 前言最近一直在Java相关漏洞进行分析学习，调试环境就是第一步需要准备的，所以总结一下，也是为跟我一样想要接触漏洞调试分析的萌新提供一些参考吧。 文笔粗糙，如有不当，请大佬批评指正。 0x01 调试基本方法调试环境 Intelli IDEA 2019.2.4 Windows1">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java调试总结">
-<meta property="og:url" content="http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:url" content="https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="R17a&#39;s blog">
 <meta property="og:description" content="本文章已投稿seebug：https:&#x2F;&#x2F;paper.seebug.org&#x2F;1316&#x2F; 【有点尴尬的是排版乱的】 0x00 前言最近一直在Java相关漏洞进行分析学习，调试环境就是第一步需要准备的，所以总结一下，也是为跟我一样想要接触漏洞调试分析的萌新提供一些参考吧。 文笔粗糙，如有不当，请大佬批评指正。 0x01 调试基本方法调试环境 Intelli IDEA 2019.2.4 Windows1">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730141940843.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150108545.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150238346.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150321594.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150401940.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150445665.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150540757.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150633338.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150922850.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730151001792.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730151042932.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730151129937.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730150445665.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200730162129273.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200731095451460.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200822235926488.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823001226137.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823001328548.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823001500000.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823000427861.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823002859886.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823003054337.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823003541976.png">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200823003502751.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730141940843.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150108545.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150238346.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150321594.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150401940.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150445665.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150540757.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150633338.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150922850.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730151001792.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730151042932.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730151129937.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730150445665.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200730162129273.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200731095451460.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200822235926488.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823001226137.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823001328548.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823001500000.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823000427861.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823002859886.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823003054337.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823003541976.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200823003502751.png">
 <meta property="article:published_time" content="2020-08-28T06:29:34.000Z">
 <meta property="article:modified_time" content="2020-08-28T06:29:34.000Z">
 <meta property="article:author" content="R17a">
 <meta property="article:tag" content="调试方法">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/imgs/image-20200730141940843.png">
+<meta name="twitter:image" content="https://r17a-17.github.io/imgs/image-20200730141940843.png">
     
     
         
@@ -124,17 +124,17 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&text=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&is_video=false&description=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Java调试总结&body=Check out this article: http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&name=Java调试总结&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&t=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&text=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&is_video=false&description=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java调试总结&body=Check out this article: https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&name=Java调试总结&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&t=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -324,17 +324,17 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&text=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&is_video=false&description=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Java调试总结&body=Check out this article: http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&name=Java调试总结&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&t=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&text=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&is_video=false&description=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java调试总结&body=Check out this article: https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&title=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&name=Java调试总结&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/08/28/Java%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/&t=Java调试总结" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

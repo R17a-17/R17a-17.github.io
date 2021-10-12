@@ -9,18 +9,18 @@
     <meta name="description" content="代理模式是常用的java设计模式，他的特征是代理类与委托类有同样的接口，代理类主要负责为委托类预处理消息、过滤消息、把消息转发给委托类，以及事后处理消息等。代理类与委托类之间通常会存在关联关系，一个代理类的对象与一个委托类的对象关联，代理类的对象本身并不真正实现服务，而是通过调用委托类的对象的相关方法，来提供特定的服务。简单的说就是，我们在访问实际对象时，是通过代理对象来访问的，代理模式就是在访问">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java动态代理">
-<meta property="og:url" content="http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/index.html">
+<meta property="og:url" content="https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/index.html">
 <meta property="og:site_name" content="R17a&#39;s blog">
 <meta property="og:description" content="代理模式是常用的java设计模式，他的特征是代理类与委托类有同样的接口，代理类主要负责为委托类预处理消息、过滤消息、把消息转发给委托类，以及事后处理消息等。代理类与委托类之间通常会存在关联关系，一个代理类的对象与一个委托类的对象关联，代理类的对象本身并不真正实现服务，而是通过调用委托类的对象的相关方法，来提供特定的服务。简单的说就是，我们在访问实际对象时，是通过代理对象来访问的，代理模式就是在访问">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20200606110709033.png">
-<meta property="og:image" content="http://yoursite.com/imgs/Snipaste_2021-06-16_14-33-49.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20200606110709033.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/Snipaste_2021-06-16_14-33-49.png">
 <meta property="article:published_time" content="2020-06-13T07:13:00.000Z">
 <meta property="article:modified_time" content="2020-06-13T07:13:00.000Z">
 <meta property="article:author" content="R17a">
 <meta property="article:tag" content="动态代理">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/imgs/image-20200606110709033.png">
+<meta name="twitter:image" content="https://r17a-17.github.io/imgs/image-20200606110709033.png">
     
     
         
@@ -102,17 +102,17 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&text=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&is_video=false&description=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Java动态代理&body=Check out this article: http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&name=Java动态代理&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&t=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&text=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&is_video=false&description=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java动态代理&body=Check out this article: https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&name=Java动态代理&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&t=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -238,17 +238,17 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&text=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&is_video=false&description=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Java动态代理&body=Check out this article: http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&name=Java动态代理&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&t=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&text=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&is_video=false&description=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java动态代理&body=Check out this article: https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&title=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&name=Java动态代理&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2020/06/13/Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/&t=Java动态代理" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

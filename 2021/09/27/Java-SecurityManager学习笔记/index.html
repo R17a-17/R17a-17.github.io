@@ -9,17 +9,17 @@
     <meta name="description" content="0x01 Java SecurityManager是什么Java SecurityManager是为应用程序定义安全策略的对象，通过策略指定不安全或敏感的操作，安全策略不允许的任何操作都会抛出SecurityException，应用程序可以查询其安全管理器允许的操作。 Java程序默认情况下都没有开启SecurityManager，如果开启了我们可以通过System.getSecurityMana">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java SecurityManager学习">
-<meta property="og:url" content="http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:url" content="https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="R17a&#39;s blog">
 <meta property="og:description" content="0x01 Java SecurityManager是什么Java SecurityManager是为应用程序定义安全策略的对象，通过策略指定不安全或敏感的操作，安全策略不允许的任何操作都会抛出SecurityException，应用程序可以查询其安全管理器允许的操作。 Java程序默认情况下都没有开启SecurityManager，如果开启了我们可以通过System.getSecurityMana">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://yoursite.com/imgs/image-20210929144409923.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20210929144409923.png">
 <meta property="article:published_time" content="2021-09-27T05:43:05.000Z">
 <meta property="article:modified_time" content="2021-09-27T05:43:05.000Z">
 <meta property="article:author" content="R17a">
 <meta property="article:tag" content="SecurityManager">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/imgs/image-20210929144409923.png">
+<meta name="twitter:image" content="https://r17a-17.github.io/imgs/image-20210929144409923.png">
     
     
         
@@ -99,17 +99,17 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Java SecurityManager学习&body=Check out this article: http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=Java SecurityManager学习&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java SecurityManager学习&body=Check out this article: https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=Java SecurityManager学习&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -262,17 +262,17 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Java SecurityManager学习&body=Check out this article: http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=Java SecurityManager学习&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&text=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&is_video=false&description=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java SecurityManager学习&body=Check out this article: https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&title=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&name=Java SecurityManager学习&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/&t=Java SecurityManager学习" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
