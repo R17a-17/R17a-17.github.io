@@ -84,7 +84,7 @@
       
       <categories>
           
-          <category> Java安全 </category>
+          <category> JAVA安全 </category>
           
           <category> SecurityManager </category>
           
@@ -111,7 +111,7 @@
       
       <categories>
           
-          <category> Java安全 </category>
+          <category> JAVA安全 </category>
           
           <category> URL重定向 </category>
           
@@ -140,7 +140,7 @@
       
       <categories>
           
-          <category> Java安全 </category>
+          <category> JAVA安全 </category>
           
           <category> SSRF </category>
           
@@ -167,7 +167,7 @@
       
       <categories>
           
-          <category> Java安全 </category>
+          <category> JAVA安全 </category>
           
           <category> 文件操作 </category>
           
@@ -194,7 +194,7 @@
       
       <categories>
           
-          <category> Java安全 </category>
+          <category> JAVA安全 </category>
           
           <category> 命令执行 </category>
           
